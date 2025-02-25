@@ -20,6 +20,9 @@ This module relies on several packages for LCA calculations:
 - [regiopremise](https://github.com/matthieu-str/Regiopremise/tree/master) – A Python module to enhance premise-generated database with regionalization 
   - Relies on [Regioinvent](https://github.com/CIRAIG/Regioinvent)
 
+Additionally, the [pyam](https://pyam-iamc.readthedocs.io/en/stable/) package is used to fetch SSP and IAM data,
+and transform the IEA data into the IAM-format.
+
 ## 📄 License
 
 This repository is licensed under the BSD 3-Clause License. See the LICENSE file for details.
