@@ -6,10 +6,14 @@ This repository contains the code and data associated with the publication:
 "Metals for the Energy Transition: A Heavy Environmental Burden to Life?"
 
 ## 📌 Features
-- Regionalized prospective LCI generation for metals
-- Custom metal scenarios developed by Marguerite Fauroux
-- Coupling with IEA's Stated Policies and Net Zero Scenarios
+- Use of IEA's Stated Policies and Net Zero Scenarios for an estimate of the future demand for 35 metals
+- Regionalized prospective LCI database generation 
+- Custom metal scenarios developed by Marguerite Fauroux. 
+They include the evolution of secondary production in the supply of aluminum, copper, cobalt, nickel and lithium. 
+The evolution of the electricity mix and the efficiency of aluminum smelters in China were also modeled.
+- Use of IEA's Stated Policies and Net Zero Scenarios for an estimate of the future demand for 35 metals
 - LCA calculations using [IMPACT World+ 2.1 version](https://www.impactworldplus.org/)
+
 
 ## 📦 Dependencies
 
