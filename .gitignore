@@ -1,0 +1,4 @@
+# Ignore system/desktop files
+.DS_Store
+Thumbs.db
+desktop.ini

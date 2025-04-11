@@ -1,0 +1,8 @@
+model,scenario,region,variable,unit,2022,2023,2030,2035,2040,2050
+IEA-WEO,Net Zero Emissions by 2050 Scenario,World,Carbon Sequestration,Mt CO2,,40.39,1022.56,2539.66,4000.51,5923.98
+IEA-WEO,Net Zero Emissions by 2050 Scenario,World,Emissions|CO2,Mt CO2,,37723.05,25112.4,13484.59,6220.91,0
+IEA-WEO,Net Zero Emissions by 2050 Scenario,World,Emissions|CO2|Energy,Mt CO2,,34788.62,23082.09,12142.89,5678.17,777.44
+IEA-WEO,Stated Policies Scenario,World,Carbon Sequestration,Mt CO2,43.2,40.39,122.01,192.34,261.35,394.89
+IEA-WEO,Stated Policies Scenario,World,Emissions|CO2,Mt CO2,37229.96,37723.05,36170.16,33285.4,31184.82,28635.59
+IEA-WEO,Stated Policies Scenario,World,Emissions|CO2|Energy,Mt CO2,34290.31,34788.62,33231.6,30291.79,28163.34,25616.55
+IEA-WEO,Additional impact,World,Emissions|CO2,MtCO2,,0,11057.76,19800.81,24963.91,28635.59
