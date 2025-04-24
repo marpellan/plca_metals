@@ -1,6 +1,8 @@
 Scenario,Year,Sector,CF unit,Impact value,Impact category
 Net Zero Emissions by 2050 Scenario,2022,Energy transition,PDF.m2.yr,114396596830.28336,Climate change (EQ)
 Net Zero Emissions by 2050 Scenario,2022,Energy transition,DALY,1190467.8940279589,Climate change (HH)
+Net Zero Emissions by 2050 Scenario,2022,Total energy system,PDF.m2.yr,24090432502965.312,Climate change (EQ)
+Net Zero Emissions by 2050 Scenario,2022,Total energy system,DALY,246797263.71402603,Climate change (HH)
 Net Zero Emissions by 2050 Scenario,2025,Energy transition,PDF.m2.yr,145394370041.37128,Climate change (EQ)
 Net Zero Emissions by 2050 Scenario,2025,Energy transition,DALY,1512596.2696052254,Climate change (HH)
 Net Zero Emissions by 2050 Scenario,2030,Energy transition,PDF.m2.yr,179588632916.81537,Climate change (EQ)

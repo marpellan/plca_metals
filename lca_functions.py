@@ -10,6 +10,7 @@ def setup_activities_dict(df, scenario_prefix):
     Create a dictionary mapping (scenario, year, metal, technology) to Brightway activities.
     """
     activities_dict = {}
+    years = ["2022", "2025", "2030", "2035", "2040", "2045", "2050"]
 
     for index, row in df.iterrows():
         metal = row["Metal"]
@@ -46,6 +47,7 @@ def calculate_lca(df, activities_dict, scenario_prefix, lcia_methods):
     Returns a DataFrame with results disaggregated.
     """
     results = []
+    years = ["2022", "2025", "2030", "2035", "2040", "2045", "2050"]
 
     for index, row in df.iterrows():
         metal = row["Metal"]
@@ -84,6 +86,7 @@ def calculate_lca_optimized(df, activities_dict, scenario_prefix, lcia_methods):
     Optimized LCA calculations for different scenarios, years, metals, and technologies.
     """
     results = []
+    years = ["2022", "2025", "2030", "2035", "2040", "2045", "2050"]
 
     for index, row in df.iterrows():
         metal = row["Metal"]
@@ -120,3 +123,30 @@ def calculate_lca_optimized(df, activities_dict, scenario_prefix, lcia_methods):
                 })
 
     return pd.DataFrame(results)
+
+
+def transform_co2_impact(iea_df: pd.DataFrame, cf_df: pd.DataFrame) -> pd.DataFrame:
+    """Compute impact assessment from CO₂ emissions and CFs, including aggregate categories."""
+    # Filter CFs for CO₂ fossil only
+    cf_co2 = cf_df[cf_df["Elem flow name"] == "Carbon dioxide, fossil"].copy()
+
+    # Convert Mt CO₂ to kg
+    iea_df = iea_df.copy()
+    iea_df["VALUE_kg"] = iea_df["VALUE"] * 1e9
+
+    # Create a cross join key
+    iea_df["key"] = 1
+    cf_co2["key"] = 1
+    merged_df = pd.merge(iea_df, cf_co2, on="key").drop(columns=["key"])
+
+    # Compute impact value
+    merged_df["Impact value"] = merged_df["VALUE_kg"] * merged_df["CF value"]
+
+    # Final output
+    result = merged_df[[
+        "SCENARIO", "YEAR", "Impact category", "Impact value", "CF unit"
+    ]].sort_values(by=["SCENARIO", "YEAR", "Impact category"]).reset_index(drop=True)
+
+    result = result.rename(columns={"SCENARIO": "Scenario", "YEAR": "Year"})
+
+    return result

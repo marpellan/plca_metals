@@ -389,3 +389,339 @@ def create_sankey(df, total_col, impact_columns, title, save_path):
     # fig.write_image(f"{save_path}.pdf")  # High resolution PNG
 
     return fig
+
+
+def plot_lineplot_burden_comparison(df, save_path=None, show=True):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import pandas as pd
+    import os
+
+    # Matplotlib formatting for Joule-quality figures
+    from matplotlib import rcParams
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'Arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+
+    # Pivot and clean
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+    pivot_df = df.pivot_table(
+        index=["Year", "Sector", "Impact category"],
+        columns="Scenario",
+        values="Impact value"
+    ).reset_index()
+    pivot_df.columns.name = None
+    scenario_1, scenario_2 = pivot_df.columns[3:]
+
+    scenario_map = {
+        "Net Zero Emissions by 2050 Scenario": "NZS",
+        "Stated Policies Scenario": "STEPS"
+    }
+
+    pivot_df[scenario_1] = pd.to_numeric(pivot_df[scenario_1], errors="coerce")
+    pivot_df[scenario_2] = pd.to_numeric(pivot_df[scenario_2], errors="coerce")
+
+    hh_df = pivot_df[pivot_df["Impact category"] == "Climate change (HH)"]
+    eq_df = pivot_df[pivot_df["Impact category"] == "Climate change (EQ)"]
+
+    sns.set_style("white")
+    fig, axes = plt.subplots(2, 2, figsize=(10, 6), sharex=True)
+    fig.subplots_adjust(hspace=0.35, wspace=0.25)
+
+    panels = [
+        (hh_df, "Energy transition", axes[0, 0], "Human Health (HH)", "DALY"),
+        (hh_df, "Total energy system", axes[0, 1], "Human Health (HH)", ""),
+        (eq_df, "Energy transition", axes[1, 0], "Ecosystem Quality (EQ)", "PDF·m²·yr"),
+        (eq_df, "Total energy system", axes[1, 1], "Ecosystem Quality (EQ)", "")
+    ]
+
+    handles_created = False
+    all_handles, all_labels = [], []
+
+    for df_part, sector, ax, title, ylabel in panels:
+        sub = df_part[df_part["Sector"] == sector].dropna(subset=[scenario_1, scenario_2]).sort_values("Year")
+        years = sub["Year"].values
+        val_1 = sub[scenario_1].values
+        val_2 = sub[scenario_2].values
+
+        line1, = ax.plot(years, val_1, marker='o', color="#1f77b4", label=scenario_map.get(scenario_1, scenario_1))
+        line2, = ax.plot(years, val_2, marker='s', color="#2ca02c", label=scenario_map.get(scenario_2, scenario_2))
+        ax.fill_between(years, val_1, val_2, color="#b2df8a", alpha=0.5)
+
+        ax.set_title(f"{title} – {sector}")
+        ax.set_ylabel(ylabel)
+        ax.set_xlabel("")
+        ax.set_xticks(years)
+        ax.set_xticklabels([int(y) for y in years])
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+        ax.spines[['top', 'right']].set_visible(False)
+
+        # Only collect legend handles once
+        if not handles_created:
+            all_handles.extend([line1, line2])
+            all_labels.extend([scenario_map.get(scenario_1), scenario_map.get(scenario_2)])
+            patch = plt.Line2D([0], [0], color="#b2df8a", lw=6, alpha=0.5)
+            all_handles.append(patch)
+            all_labels.append("Difference")
+            handles_created = True
+
+    plt.tight_layout(rect=[0, 0.05, 1, 1])  # Room for legend
+
+    # One shared legend below
+    fig.legend(all_handles, all_labels,
+               loc='lower center',
+               bbox_to_anchor=(0.5, -0.01),
+               ncol=3,
+               frameon=False)
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True)
+        plt.savefig(f"{save_path}.png", format="png", dpi=600)
+
+    if show:
+        plt.show()
+    else:
+        plt.close()
+
+
+def plot_lineplot_burden_comparison_combined(df, save_path=None, show=True):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import pandas as pd
+    import os
+
+    from matplotlib import rcParams
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'Arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+    pivot_df = df.pivot_table(
+        index=["Year", "Sector", "Impact category"],
+        columns="Scenario",
+        values="Impact value"
+    ).reset_index()
+    pivot_df.columns.name = None
+    scenario_1, scenario_2 = pivot_df.columns[3:]
+
+    scenario_map = {
+        "Net Zero Emissions by 2050 Scenario": "NZS",
+        "Stated Policies Scenario": "STEPS"
+    }
+
+    pivot_df[scenario_1] = pd.to_numeric(pivot_df[scenario_1], errors="coerce")
+    pivot_df[scenario_2] = pd.to_numeric(pivot_df[scenario_2], errors="coerce")
+
+    impact_categories = ["Climate change (HH)", "Climate change (EQ)"]
+    ylabels = {"Climate change (HH)": "DALY", "Climate change (EQ)": "PDF·m²·yr"}
+
+    sns.set_style("white")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True)
+    fig.subplots_adjust(hspace=0.35, wspace=0.25)
+
+    for idx, impact_category in enumerate(impact_categories):
+        ax = axes[idx]
+        sub_df = pivot_df[pivot_df["Impact category"] == impact_category]
+
+        for sector, linestyle, marker in zip(["Total energy system", "Energy transition"], ["-", "--"], ['o', None]):
+            sub = sub_df[sub_df["Sector"] == sector].dropna(subset=[scenario_1, scenario_2]).sort_values("Year")
+            years = sub["Year"].values
+            val_1 = sub[scenario_1].values
+            val_2 = sub[scenario_2].values
+
+            ax.plot(years, val_1, marker=marker, linestyle=linestyle, color="#1f77b4",
+                    label=f"{scenario_map[scenario_1]} - {sector}")
+            ax.plot(years, val_2, marker=marker, linestyle=linestyle, color="#2ca02c",
+                    label=f"{scenario_map[scenario_2]} - {sector}")
+            ax.fill_between(years, val_1, val_2, color="#b2df8a", alpha=0.3)
+
+        ax.set_title(impact_category)
+        ax.set_ylabel(ylabels[impact_category])
+        ax.set_xlabel("Year")
+        ax.set_xticks(years)
+        ax.set_xticklabels([int(y) for y in years])
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+        ax.spines[['top', 'right']].set_visible(False)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc='lower center', bbox_to_anchor=(0.5, -0.02), ncol=2, frameon=False)
+
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True)
+        plt.savefig(f"{save_path}.png", format="png", dpi=600)
+
+    if show:
+        plt.show()
+    else:
+        plt.close()
+
+
+def plot_lineplot_logscale(df, save_path=None, show=True):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import pandas as pd
+    import os
+
+    from matplotlib import rcParams
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'Arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+    pivot_df = df.pivot_table(
+        index=["Year", "Sector", "Impact category"],
+        columns="Scenario",
+        values="Impact value"
+    ).reset_index()
+    pivot_df.columns.name = None
+    scenario_1, scenario_2 = pivot_df.columns[3:]
+
+    scenario_map = {
+        "Net Zero Emissions by 2050 Scenario": "NZS",
+        "Stated Policies Scenario": "STEPS"
+    }
+
+    pivot_df[scenario_1] = pd.to_numeric(pivot_df[scenario_1], errors="coerce")
+    pivot_df[scenario_2] = pd.to_numeric(pivot_df[scenario_2], errors="coerce")
+
+    impact_categories = ["Climate change (HH)", "Climate change (EQ)"]
+    ylabels = {"Climate change (HH)": "DALY", "Climate change (EQ)": "PDF·m²·yr"}
+
+    sns.set_style("white")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True)
+    fig.subplots_adjust(hspace=0.3, wspace=0.25)
+
+    for idx, impact_category in enumerate(impact_categories):
+        ax = axes[idx]
+        sub_df = pivot_df[pivot_df["Impact category"] == impact_category]
+
+        for sector, linestyle, linewidth, alpha in zip(["Total energy system", "Energy transition"], ["-", "--"], [2, 1.5], [1, 0.8]):
+            sub = sub_df[sub_df["Sector"] == sector].dropna(subset=[scenario_1, scenario_2]).sort_values("Year")
+            years = sub["Year"].values
+            val_1 = sub[scenario_1].values
+            val_2 = sub[scenario_2].values
+
+            ax.plot(years, val_1, marker='o', markersize=4, linestyle=linestyle, linewidth=linewidth, alpha=alpha,
+                    color="#1f77b4", label=f"{scenario_map[scenario_1]} - {sector}")
+            ax.plot(years, val_2, marker='s', markersize=4, linestyle=linestyle, linewidth=linewidth, alpha=alpha,
+                    color="#2ca02c", label=f"{scenario_map[scenario_2]} - {sector}")
+
+        ax.set_yscale('log')
+        ax.set_title(impact_category)
+        ax.set_ylabel(ylabels[impact_category])
+        ax.set_xlabel("")
+        ax.set_xticks(years)
+        ax.set_xticklabels([int(y) for y in years])
+        ax.spines[['top', 'right']].set_visible(False)
+        ax.grid(axis='y', linestyle="--", linewidth=0.5, alpha=0.4)  # Only y-grid
+
+    # Fix legend positioning for export
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels,
+           loc='center left',
+           bbox_to_anchor=(0.85, 0.5),
+           frameon=False)
+
+
+    # Make sure there is enough room at bottom
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True, bbox_inches='tight')
+        plt.savefig(f"{save_path}.png", format="png", dpi=600, bbox_inches='tight')
+
+    if show:
+        plt.show()
+    else:
+        plt.close()
+
+
+def plot_percentage_transition(df, save_path=None, show=True):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import pandas as pd
+    import numpy as np
+    import os
+    from scipy.interpolate import make_interp_spline
+
+    from matplotlib import rcParams
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'Arial'
+    rcParams['font.size'] = 10
+
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+    pivot_df = df.pivot(index=["Year", "Impact category", "Scenario"], columns="Sector", values="Impact value").reset_index()
+    pivot_df['Percentage'] = 100 * pivot_df['Energy transition'] / pivot_df['Total energy system']
+
+    impact_categories = pivot_df["Impact category"].unique()
+    scenarios = pivot_df["Scenario"].unique()
+
+    sns.set_style("white")
+    fig, axes = plt.subplots(1, len(impact_categories), figsize=(12, 5))
+
+    for idx, impact_category in enumerate(impact_categories):
+        ax = axes[idx]
+        for scenario, color in zip(scenarios, ["#1f77b4", "#2ca02c"]):
+            sub = pivot_df[(pivot_df["Impact category"] == impact_category) & (pivot_df["Scenario"] == scenario)]
+            sub = sub[np.isfinite(sub["Percentage"])]
+            years = sub["Year"].values
+            percentages = sub["Percentage"].values
+
+            if len(years) >= 4:
+                spline = make_interp_spline(years, percentages, k=3)
+                interpolated_years = np.linspace(years.min(), years.max(), 200)
+                interpolated_percentages = spline(interpolated_years)
+                ax.plot(interpolated_years, interpolated_percentages, color=color, label=scenario)
+            else:
+                interpolated_years = np.linspace(years.min(), years.max(), 200)
+                interpolated_percentages = np.interp(interpolated_years, years, percentages)
+                ax.plot(interpolated_years, interpolated_percentages, color=color, label=scenario)
+
+            ax.scatter(years, percentages, color=color, edgecolor='black')
+
+        ax.set_title(f"{impact_category}")
+        ax.set_ylabel("Percentage (%)")
+        ax.set_xlabel("")
+        ax.spines[['top', 'right']].set_visible(False)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels,
+               loc='center left',
+               bbox_to_anchor=(0.85, 0.5),
+               frameon=False)
+
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True, bbox_inches='tight')
+        plt.savefig(f"{save_path}.png", format="png", dpi=600, bbox_inches='tight')
+
+    if show:
+        plt.show()
+    else:
+        plt.close()
