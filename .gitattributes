@@ -1,1 +1,4 @@
 *.ipynb linguist-language=Python
+
+# Ignore plotly-exported HTML files in language stats
+results/plots/**/*.html linguist-vendored=true
