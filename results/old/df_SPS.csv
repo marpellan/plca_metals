@@ -1,0 +1,53 @@
+Metal,Technology,Market,Reference Product,Location,Scenario,2022,2025,2030,2035,2040,2045,2050
+Aluminium,Electricity Networks,"market for aluminium, wrought alloy (SM)","aluminium, wrought alloy",World,SPS,10357000000.0,11606.0,14527000000.0,14482.0,14174000000.0,14943.0,14343000000.0
+Arsenic,Solar PV,market for arsine,arsine,GLO,SPS,0.0,0.0,190329.0,1.08483,6381790.0,7.38525,8349830.000000001
+Boron,Wind,market for boric oxide,boric oxide,GLO,SPS,158618.0,0.175778,314919.0,0.287788,259729.0,0.329544,408226.0
+Cadmium,Solar PV,"market for cadmium, semiconductor-grade","cadmium, semiconductor-grade",GLO,SPS,420843.0,0.420292,397562.0,0.395331,411500.0,0.465976,503529.0
+Chromium,Wind,"market for ferrochromium, high-carbon, 68% Cr","ferrochromium, high-carbon, 68% Cr",GLO,SPS,50316000.0,54.1772,72675000.0,70.6757,65865600.0,81.2922,90071500.0
+Cobalt,EV,market for cobalt sulfate (SM),cobalt sulfate,World,SPS,64560599.99999999,66.3701,73937400.0,77.6728,105309000.0,133.987,145613000.0
+Cobalt,Battery Storage,market for cobalt sulfate (SM),cobalt sulfate,World,SPS,3588530.0,3.0904,5454650.0,6.17341,4745430.0,2.25891,0.0
+Cobalt,Hydrogen,market for cobalt sulfate (SM),cobalt sulfate,World,SPS,10734.6,0.0103157,13902.8,0.00736812,3299.83,0.00356164,4953.660000000001
+Copper,Solar PV,"market for copper, cathode (SM)","copper, cathode",World,SPS,681645000.0,778.954,907252000.0,924.8,958766000.0,1122.06,1261660000.0
+Copper,Wind,"market for copper, cathode (SM)","copper, cathode",World,SPS,393792000.0,427.765,646333000.0,595.255,532289999.99999994,639.006,720634000.0
+Copper,EV,"market for copper, cathode (SM)","copper, cathode",World,SPS,373331000.0,579.785,1044140000.0000001,1219.21,1421160000.0,1457.66,1345870000.0
+Copper,Battery Storage,"market for copper, cathode (SM)","copper, cathode",World,SPS,20446800.0,38.4437,82727900.0,153.587,225253000.0,238.484,219724000.0
+Copper,Electricity Networks,"market for copper, cathode (SM)","copper, cathode",World,SPS,4181609999.9999995,4578.91,6510250000.0,6510.83,6582400000.0,7113.43,6982320000.0
+Dysprosium,Wind,market for dysprosium oxide,dysprosium oxide,GLO,SPS,628063.0,0.6768,1061960.0,0.961484,850917.0,1.03322,1185500.0
+Dysprosium,EV,market for dysprosium oxide,dysprosium oxide,GLO,SPS,412567.0,0.741466,1206380.0,1.47787,1839840.0,2.12784,2234850.0
+Ferromanganese,Wind,"market for ferromanganese, high-coal, 74.5% Mn","ferromanganese, high-coal, 74.5% Mn",GLO,SPS,79995300.0,86.0514,114161000.0,111.021,103289000.0,127.459,140787000.0
+Ferromanganese,EV,"market for ferromanganese, high-coal, 74.5% Mn","ferromanganese, high-coal, 74.5% Mn",GLO,SPS,37684800.0,28.94595,76178500.0,149.029,260735500.0,400.7895,496972000.0
+Ferronickel,Solar PV,market for ferronickel,ferronickel,GLO,SPS,252100.0,0.288752,342161.0,0.34743,363753.0,0.419371,471855.0
+Ferronickel,Wind,market for ferronickel,ferronickel,GLO,SPS,36538100.0,39.1868,49976600.0,49.157,46037900.0,56.489,61148900.0
+Gallium,Solar PV,"market for gallium, semiconductor-grade","gallium, semiconductor-grade",GLO,SPS,8685.480000000001,0.0103628,87645.4,0.44446,2557940.0,2.95814,3342090.0
+Graphite,EV,"market for graphite, battery grade","graphite, battery grade",CN,SPS,557201000.0,935.667,1590250000.0,1781.78,1690570000.0,1491.75,1077400000.0
+Graphite,Battery Storage,"market for graphite, battery grade","graphite, battery grade",CN,SPS,29839800.0,51.7309,107341000.0,190.947,267220000.00000003,272.461,245152000.0
+Indium,Solar PV,market for indium,indium,GLO,SPS,32570.6,0.0375406,40462.2,0.0453778,72903.9,0.0784324,81339.09999999999
+Iridium,Hydrogen,"platinum group metal, extraction and refinery operations",iridium,RU,SPS,313.812,0.000282349,227.078,0.000191897,166.419,0.000154223,147.652
+Lead,Solar PV,market for lead,lead,GLO,SPS,1163540.0,1.3327,1579200.0,1.60352,1678860.0,1.94332,2195730.0
+Lithium,EV,"market for lithium carbonate, battery grade","lithium carbonate, battery grade",World,SPS,69739000.0,123.04,228013000.0,325.354,433207000.0,490.857,465842000.0
+Lithium,Battery Storage,"market for lithium carbonate, battery grade","lithium carbonate, battery grade",World,SPS,3435360.0,5.66415,11813400.0,20.319,26918100.0,27.6146,24593900.0
+Manganese,EV,market for manganese sulfate,manganese sulfate,GLO,SPS,37684800.0,28.94595,76178500.0,149.029,260735500.0,400.7895,496972000.0
+Manganese,Battery Storage,market for manganese sulfate,manganese sulfate,GLO,SPS,3227310.0,3.02678,5120360.0,5.07589,3207350.0,0.359821,0.0
+Molybdenum,Solar PV,market for molybdenite,molybdenite,GLO,SPS,143332.0,0.175851,208999.0,0.219155,227422.0,0.242412,245348.0
+Molybdenum,Wind,market for molybdenite,molybdenite,GLO,SPS,10530100.0,11.3365,15182400.0,14.7647,13756400.0,16.9779,18803000.0
+Neodymium,Wind,market for neodymium oxide,neodymium oxide,GLO,SPS,5806000.0,6.27185,10211100.0,9.14312,8031430.0,9.75692,11333700.0
+Neodymium,EV,market for neodymium oxide,neodymium oxide,GLO,SPS,3961940.0,7.25404,12216200.0,15.1311,18849600.0,21.8002,22879100.0
+Nickel,EV,"market for nickel, class 1 (SM)","nickel, class 1",World,SPS,325831000.0,613.862,988053000.0,1214.57,1515790000.0,1615.17,1579680000.0
+Nickel,Battery Storage,"market for nickel, class 1 (SM)","nickel, class 1",World,SPS,8911240.0,8.72817,19352500.0,25.9235,21235500.0,13.0279,0.0
+Nickel,Hydrogen,"market for nickel, class 1 (SM)","nickel, class 1",World,SPS,1766110.0,2.42723,5296300.0,4.22025,3783980.0,4.08212,5664450.0
+Platinum,Hydrogen,market for platinum,platinum,GLO,SPS,1156.64,0.00266677,6210.17,0.00994853,13647.5,0.0164974,20263.8
+Praseodymium,Wind,market for praseodymium oxide,praseodymium oxide,GLO,SPS,952234.0,1.04221,1808910.0,1.62471,1438240.0,1.79318,2174750.0
+Praseodymium,EV,market for praseodymium oxide,praseodymium oxide,GLO,SPS,594292.0,1.08811,1832430.0,2.26967,2827440.0,3.27003,3431870.0
+Selenium,Solar PV,market for selenium,selenium,GLO,SPS,75998.0,0.0828727,76377.8,0.07296,67527.2,0.0622731,52035.7
+Silicon,Solar PV,"market for silicon, metallurgical grade","silicon, metallurgical grade",GLO,SPS,756327000.0,807.814,843163000.0,823.268,828003000.0,915.714,986837000.0
+Silicon,EV,"market for silicon, metallurgical grade","silicon, metallurgical grade",GLO,SPS,8699820.0,40.4972,138516000.0,224.223,351987000.0,374.071,373485000.0
+Silicon,Battery Storage,"market for silicon, metallurgical grade","silicon, metallurgical grade",GLO,SPS,69968.5,0.184965,1132500.0,2.6964,4903640.0,6.39826,6136790.0
+Silver,Solar PV,market for silver,silver,GLO,SPS,3831000.0,4.03075,4078090.0000000005,3.43121,2852450.0,2.43856,1787450.0
+Tellurium,Solar PV,"market for tellurium, semiconductor-grade","tellurium, semiconductor-grade",GLO,SPS,422543.0,0.424987,372692.0,0.364352,365107.0,0.381685,382163.0
+Terbium,Wind,market for terbium oxide,terbium oxide,GLO,SPS,215006.0,0.23651,401499.0,0.370598,336117.0,0.426556,521262.0
+Terbium,EV,market for terbium oxide,terbium oxide,GLO,SPS,80606.3,0.148403,252407.0,0.313597,390735.0,0.451897,474163.0
+Tin,Solar PV,market for tin,tin,GLO,SPS,1202190.0,1.37983,1642190.0,1.67438,1762030.0,2.03908,2305400.0
+Vanadium,Battery Storage,vanadium pentoxide production,vanadium pentoxide,ZA,SPS,0.0,0.0,15377200.0,74.4301,220605000.0,242.886,232960000.0
+Zinc,Solar PV,market for zinc,zinc,GLO,SPS,6059460.0,6.95483,8277210.0,8.43945,8881200.0,10.2777,11620000.0
+Zinc,Wind,market for zinc,zinc,GLO,SPS,561026000.0,603.424,799386000.0,777.397,723094000.0,892.284,985183000.0
+Zirconium,Hydrogen,market for zirconium oxide,zirconium oxide,GLO,SPS,239703.0,0.329434,718836.0,0.574094,515841.0,0.557571,775065.0

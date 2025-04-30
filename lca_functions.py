@@ -10,7 +10,7 @@ def setup_activities_dict(df, scenario_prefix):
     Create a dictionary mapping (scenario, year, metal, technology) to Brightway activities.
     """
     activities_dict = {}
-    years = ["2022", "2025", "2030", "2035", "2040", "2045", "2050"]
+    years = ["2022", "2030", "2035", "2040", "2045", "2050"]
 
     for index, row in df.iterrows():
         metal = row["Metal"]
@@ -47,7 +47,7 @@ def calculate_lca(df, activities_dict, scenario_prefix, lcia_methods):
     Returns a DataFrame with results disaggregated.
     """
     results = []
-    years = ["2022", "2025", "2030", "2035", "2040", "2045", "2050"]
+    years = ["2022", "2030", "2035", "2040", "2045", "2050"]
 
     for index, row in df.iterrows():
         metal = row["Metal"]
@@ -86,7 +86,7 @@ def calculate_lca_optimized(df, activities_dict, scenario_prefix, lcia_methods):
     Optimized LCA calculations for different scenarios, years, metals, and technologies.
     """
     results = []
-    years = ["2022", "2025", "2030", "2035", "2040", "2045", "2050"]
+    years = ["2022", "2030", "2035", "2040", "2045", "2050"]
 
     for index, row in df.iterrows():
         metal = row["Metal"]

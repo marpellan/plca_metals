@@ -291,102 +291,124 @@ def plot_cumulative_midpoint_contribution(df, impact_columns, total_col, title, 
     plt.show()
 
 
-def create_sankey(df, total_col, impact_columns, title, save_path):
+def create_sankey(
+    df,
+    total_col,
+    impact_columns,
+    #title,
+    save_path,
+    agg_mapping=None,
+    metal_mapping=None
+):
     """
-    Create a Sankey diagram showing cumulative effects from metals -> technologies -> midpoint indicators.
+    Sankey: Metals → Technologies → (aggregated) Midpoints,
+    with optional aggregation of both metals and midpoint indicators.
 
-    Parameters:
-    - df: DataFrame with data
-    - total_col: Column containing total impact (e.g., 'Total ecosystem quality' or 'Total human health')
-    - impact_columns: List of midpoint impact indicators (e.g., EQ or HH categories)
-    - title: Title of the Sankey diagram
-    - save_path: Path to save the HTML file of the figure
-
-    Outputs:
-    - Saves the Sankey diagram as an interactive HTML file and PNG.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        must contain columns ["Metal","Technology", *impact_columns, total_col]
+    total_col : str
+        e.g. 'Total ecosystem quality' or 'Total human health'
+    impact_columns : list[str]
+        your detailed midpoint columns (EQ or HH)
+    title : str
+    save_path : str
+        path WITHOUT extension; .html (and optionally .png) will be added
+    agg_mapping : dict | None
+        maps each detailed midpoint → its aggregated label
+    metal_mapping : dict | None
+        maps each raw metal name → its aggregated metal group
+        e.g. {"Dysprosium":"REE", "Neodymium":"REE", "Terbium":"REE",
+               "Iridium":"PGM",   "Platinum":"PGM"}
     """
-
-    # Ensure directory exists
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    # Sum impacts over all years (2022-2050)
-    df_cumulative = df.groupby(["Metal", "Technology"])[impact_columns + [total_col]].sum().reset_index()
+    # 0) apply metal aggregation if requested
+    df_proc = df.copy()
+    if metal_mapping:
+        df_proc["Metal"] = df_proc["Metal"].map(metal_mapping).fillna(df_proc["Metal"])
 
-    # Get unique categories
-    all_metals = df_cumulative["Metal"].unique().tolist()
-    all_technologies = df_cumulative["Technology"].unique().tolist()
-    all_midpoints = impact_columns
+    # 1) sum over years (or whatever time dim you have)
+    df_cum = (
+        df_proc
+        .groupby(["Metal", "Technology"])[impact_columns + [total_col]]
+        .sum()
+        .reset_index()
+    )
 
-    # Define node labels (Metals, Technologies, Midpoints)
-    node_labels = all_metals + all_technologies + all_midpoints
+    # 2) pick off your metals (alphabetical!) and techs
+    all_metals = sorted(df_cum["Metal"].unique().tolist())
+    all_techs  = df_cum["Technology"].unique().tolist()
+
+    # 3) build your (aggregated) midpoint list
+    if agg_mapping:
+        midpoints = []
+        for m in impact_columns:
+            agg = agg_mapping.get(m)
+            if agg and agg not in midpoints:
+                midpoints.append(agg)
+        all_midpoints = midpoints
+    else:
+        all_midpoints = impact_columns
+
+    # 4) assemble nodes
+    node_labels = all_metals + all_techs + all_midpoints
     node_colors = (
-            ["#d53e4f"] * len(all_metals) +  # Metals (red shades)
-            ["#5ab4ac"] * len(all_technologies) +  # Technologies (blue-green shades)
-            ["#3288bd"] * len(all_midpoints)  # Midpoint Indicators (blue shades)
+        ["#d53e4f"] * len(all_metals) +
+        ["#5ab4ac"] * len(all_techs)  +
+        ["#3288bd"] * len(all_midpoints)
+    )
+    node_dict = {label: idx for idx, label in enumerate(node_labels)}
+
+    # 5) build metal→tech links
+    sources = []
+    targets = []
+    values  = []
+    for _, row in df_cum.iterrows():
+        sources.append(node_dict[row["Metal"]])
+        targets.append(node_dict[row["Technology"]])
+        values.append(row[total_col])
+
+    # 6) build tech→midpoint links (summing all detailed columns into each agg‐bucket)
+    for tech in all_techs:
+        block = df_cum[df_cum["Technology"] == tech]
+        for mid in all_midpoints:
+            if agg_mapping:
+                cols = [m for m in impact_columns if agg_mapping.get(m) == mid]
+                flow = block[cols].sum().sum()
+            else:
+                flow = block[mid].sum()
+            sources.append(node_dict[tech])
+            targets.append(node_dict[mid])
+            values.append(flow)
+
+    # 7) x positions (fixed columns)
+    x_pos = (
+        [0.1] * len(all_metals) +
+        [0.5] * len(all_techs)  +
+        [0.9] * len(all_midpoints)
     )
 
-    # Create node dictionary for indexing
-    node_dict = {name: i for i, name in enumerate(node_labels)}
-
-    # Initialize link sources, targets, and values
-    sources, targets, values = [], [], []
-
-    # Metal -> Technology links
-    for _, row in df_cumulative.iterrows():
-        metal_idx = node_dict[row["Metal"]]
-        tech_idx = node_dict[row["Technology"]]
-        total_flow = row[total_col]  # Total impact flow from Metal to Technology
-        sources.append(metal_idx)
-        targets.append(tech_idx)
-        values.append(total_flow)
-
-    # Technology -> Midpoint Indicator links
-    for tech in all_technologies:
-        for midpoint in all_midpoints:
-            tech_idx = node_dict[tech]
-            midpoint_idx = node_dict[midpoint]
-            total_flow = df_cumulative[df_cumulative["Technology"] == tech][midpoint].sum()
-            sources.append(tech_idx)
-            targets.append(midpoint_idx)
-            values.append(total_flow)
-
-    # Define node positions explicitly
-    x_positions = (
-            [0.1] * len(all_metals) +  # Metals on the left
-            [0.5] * len(all_technologies) +  # Technologies in the middle
-            [0.9] * len(all_midpoints)  # Midpoint indicators on the far right
-    )
-
-    # Create Sankey figure
+    # 8) draw
     fig = go.Figure(go.Sankey(
+        arrangement="snap",  # or "fixed"
         node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=1),
-            label=node_labels,
-            color=node_colors,
-            x=x_positions,
+            pad=15, thickness=20, line=dict(color="black", width=1),
+            label=node_labels, color=node_colors, x=x_pos
         ),
-        link=dict(
-            source=sources,
-            target=targets,
-            value=values
-        )
+        link=dict(source=sources, target=targets, value=values)
     ))
-
     fig.update_layout(
-        title_text=title,
-        font=dict(family="Arial", size=12, color="black"),
-        font_size=12,
-        font_color="black",  # Ensure text remains visible
-        width=1200,
-        height=700,
-        paper_bgcolor="white",  # Set the entire image background to white
-        plot_bgcolor="white"  # Set the plot area background to white
+        #title_text=title,
+        font_family="Arial", font_size=12,
+        width=1200, height=700,
+        paper_bgcolor="white", plot_bgcolor="white"
     )
-    # Save as interactive HTML and PNG
+
+    # 9) save outputs
     fig.write_html(f"{save_path}.html")
-    # fig.write_image(f"{save_path}.pdf")  # High resolution PNG
+    # fig.write_image(f"{save_path}.png", scale=2)
 
     return fig
 
