@@ -1,13 +1,18 @@
 import pandas as pd
 import numpy as np
 import os
+import math
+# Matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib import rcParams
+from matplotlib.lines import Line2D
+import seaborn as sns
 import plotly.graph_objects as go
 
+
 ### SET GLOBAL MATPLOTLIB PARAMS
-rcParams['pdf.fonttype'] = 42  # to snsure TrueType fonts are embedded
+rcParams['pdf.fonttype'] = 42  # to Ensure TrueType fonts are embedded
 rcParams['ps.fonttype'] = 42
 rcParams['font.family'] = 'arial'
 rcParams['font.size'] = 10
@@ -16,6 +21,9 @@ rcParams['legend.fontsize'] = 9
 rcParams['xtick.labelsize'] = 9
 rcParams['ytick.labelsize'] = 9
 rcParams['axes.titlesize'] = 12
+
+# TO AVOID CONFLICTS
+sns.reset_orig()
 
 
 ### FUNCTIONS
@@ -395,20 +403,20 @@ def create_sankey(
         arrangement="snap",  # or "fixed"
         node=dict(
             pad=15, thickness=20, line=dict(color="black", width=1),
-            label=node_labels, color=node_colors, x=x_pos
+            label=node_labels, color=node_colors, x=x_pos,
         ),
         link=dict(source=sources, target=targets, value=values)
     ))
     fig.update_layout(
         #title_text=title,
-        font_family="Arial", font_size=12,
-        width=1200, height=700,
+        font_family="Arial", font_color='black', font_size=16,
+        width=1200, height=800,
         paper_bgcolor="white", plot_bgcolor="white"
     )
 
     # 9) save outputs
     fig.write_html(f"{save_path}.html")
-    # fig.write_image(f"{save_path}.png", scale=2)
+    fig.write_image(f"{save_path}.pdf", format="pdf", width=1200, height=800, scale=2)
 
     return fig
 
@@ -594,13 +602,7 @@ def plot_lineplot_burden_comparison_combined(df, save_path=None, show=True):
         plt.close()
 
 
-def plot_lineplot_logscale(df, save_path=None, show=True):
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import pandas as pd
-    import os
-
-    from matplotlib import rcParams
+def plot_lineplot_logscale(df, save_path=None, show=False):
     rcParams['pdf.fonttype'] = 42
     rcParams['ps.fonttype'] = 42
     rcParams['font.family'] = 'Arial'
@@ -621,15 +623,20 @@ def plot_lineplot_logscale(df, save_path=None, show=True):
     scenario_1, scenario_2 = pivot_df.columns[3:]
 
     scenario_map = {
-        "Net Zero Emissions by 2050 Scenario": "NZS",
+        "Net Zero Emissions by 2050 Scenario": "NZE",
         "Stated Policies Scenario": "STEPS"
     }
 
-    pivot_df[scenario_1] = pd.to_numeric(pivot_df[scenario_1], errors="coerce")
-    pivot_df[scenario_2] = pd.to_numeric(pivot_df[scenario_2], errors="coerce")
-
     impact_categories = ["Climate change (HH)", "Climate change (EQ)"]
     ylabels = {"Climate change (HH)": "DALY", "Climate change (EQ)": "PDF·m²·yr"}
+    fill_colors = {
+        "Total energy system": "#99d8c9",
+        "Energy transition": "#ffadad"
+    }
+    custom_labels = {
+        "Total energy system": "Cumulative avoided impact",
+        "Energy transition": "Cumulative additional impact"
+    }
 
     sns.set_style("white")
     fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True)
@@ -639,16 +646,42 @@ def plot_lineplot_logscale(df, save_path=None, show=True):
         ax = axes[idx]
         sub_df = pivot_df[pivot_df["Impact category"] == impact_category]
 
-        for sector, linestyle, linewidth, alpha in zip(["Total energy system", "Energy transition"], ["-", "--"], [2, 1.5], [1, 0.8]):
+        for sector_idx, (sector, linestyle, linewidth, alpha) in enumerate(
+            zip(["Total energy system", "Energy transition"], ["-", "--"], [2, 1.5], [1, 0.8])
+        ):
             sub = sub_df[sub_df["Sector"] == sector].dropna(subset=[scenario_1, scenario_2]).sort_values("Year")
             years = sub["Year"].values
             val_1 = sub[scenario_1].values
             val_2 = sub[scenario_2].values
 
-            ax.plot(years, val_1, marker='o', markersize=4, linestyle=linestyle, linewidth=linewidth, alpha=alpha,
-                    color="#1f77b4", label=f"{scenario_map[scenario_1]} - {sector}")
-            ax.plot(years, val_2, marker='s', markersize=4, linestyle=linestyle, linewidth=linewidth, alpha=alpha,
-                    color="#2ca02c", label=f"{scenario_map[scenario_2]} - {sector}")
+            ax.plot(years, val_1, marker='o', markersize=4, linestyle=linestyle, linewidth=linewidth,
+                    alpha=alpha, color="#1f77b4", label=f"{scenario_map[scenario_1]} - {sector}")
+            ax.plot(years, val_2, marker='s', markersize=4, linestyle=linestyle, linewidth=linewidth,
+                    alpha=alpha, color="#2ca02c", label=f"{scenario_map[scenario_2]} - {sector}")
+
+            # Fill area (not added to legend)
+            ax.fill_between(
+                years, val_1, val_2,
+                interpolate=True,
+                color=fill_colors[sector],
+                alpha=0.3
+            )
+
+            # Δ annotation in matching color
+            diff_area = np.trapz(val_1 - val_2, x=years)
+            x_center = 0.50
+            y_offset = 0.5 if sector == "Total energy system" else 0.3
+            ax.annotate(
+                f"{custom_labels[sector]}\nΔ = {diff_area:.1e}",
+                xy=(x_center, y_offset),
+                xycoords='axes fraction',
+                fontsize=10,
+                fontweight='bold',
+                ha='right',
+                va='center',
+                color=fill_colors[sector],
+                bbox=dict(facecolor="white", edgecolor="none", boxstyle="round,pad=0.2", alpha=0.7)
+            )
 
         ax.set_yscale('log')
         ax.set_title(impact_category)
@@ -657,20 +690,18 @@ def plot_lineplot_logscale(df, save_path=None, show=True):
         ax.set_xticks(years)
         ax.set_xticklabels([int(y) for y in years])
         ax.spines[['top', 'right']].set_visible(False)
-        ax.grid(axis='y', linestyle="--", linewidth=0.5, alpha=0.4)  # Only y-grid
+        ax.grid(axis='y', linestyle="--", linewidth=0.5, alpha=0.4)
 
-    # Fix legend positioning for export
+    # Remove "Gap:" lines from legend
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels,
-           loc='center left',
-           bbox_to_anchor=(0.85, 0.5),
-           frameon=False)
+    clean_handles_labels = [(h, l) for h, l in zip(handles, labels) if not l.startswith("Gap:")]
+    clean_handles, clean_labels = zip(*clean_handles_labels)
+    fig.legend(clean_handles, clean_labels, loc='center left', bbox_to_anchor=(0.85, 0.5), frameon=False)
 
-
-    # Make sure there is enough room at bottom
     plt.tight_layout(rect=[0, 0, 0.85, 1])
 
     if save_path:
+        import os
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True, bbox_inches='tight')
         plt.savefig(f"{save_path}.png", format="png", dpi=600, bbox_inches='tight')
@@ -747,3 +778,215 @@ def plot_percentage_transition(df, save_path=None, show=True):
         plt.show()
     else:
         plt.close()
+
+
+def plot_all_metals_subplots(
+        df,
+        ncols=4,
+        energy_color='#31a354',
+        rest_color='#de2d26',
+        save_path=None,
+        show=False
+):
+    """
+    Multi-panel line plot with shared legend placed in the empty bottom-right subplot.
+    """
+    metals = df['Metal'].unique()
+    n = len(metals)
+    nrows = math.ceil(n / ncols)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(ncols * 4, nrows * 3), squeeze=False)
+
+    # Plot each metal
+    for idx, metal in enumerate(metals):
+        r, c = divmod(idx, ncols)
+        ax = axes[r][c]
+        sub = df[df['Metal'] == metal]
+        ax.plot(sub['Year'], sub['Energy transition (kt)'], marker='o',
+                color=energy_color)
+        ax.plot(sub['Year'], sub['Rest of the economy (kt)'], marker='s',
+                color=rest_color)
+        ax.set_title(metal)
+        ax.set_xlabel('Year')
+        ax.set_ylabel('Demand (kt)')
+
+    # Prepare legend handles
+    handles = [
+        Line2D([0], [0], color=energy_color, marker='o', label='Energy transition'),
+        Line2D([0], [0], color=rest_color, marker='s', label='Rest of economy')
+    ]
+
+    # Hide unused subplots and place legend in the first empty spot
+    for idx in range(n, nrows * ncols):
+        r, c = divmod(idx, ncols)
+        axes[r][c].axis('off')
+        # place legend in that first empty subplot
+        # axes[r][c].legend(handles=handles, loc='lower right', frameon=False)
+
+        # after — framed and larger
+        legend = axes[r][c].legend(
+            handles=handles,
+            loc='lower right',
+            frameon=True,  # turn the box on
+            edgecolor='black',  # box border color
+            facecolor='white',  # box fill
+            fontsize=12,  # larger text
+            markerscale=1.5,  # bigger markers
+            handlelength=2.0,  # longer line samples
+            borderpad=1.0  # space between box and content
+        )
+        legend.get_frame().set_linewidth(1.0)  # thicker frame line
+        break  # only use the first empty spot
+
+    plt.tight_layout()
+
+    # Save both PDF and PNG at high resolution
+    if save_path:
+        fig.savefig(f"{save_path}.pdf", format='pdf', dpi=600)
+        fig.savefig(f"{save_path}.png", format='png', dpi=600)
+
+    if show:
+        plt.show()
+
+    plt.close()
+
+
+def plot_all_metals_subplots_damage(df_nze, df_ssp2, impact_type, save_path=None, ncols=4):
+    """
+    Multi-panel plot comparing NZE vs SSP2 for each metal, with NZE aggregated over all technologies.
+    Fixes: enlarged legend and avoids drawing an empty grid cell.
+    """
+    # Aggregate NZE over all technologies
+    df_nze_agg = df_nze.groupby(["Year", "Metal"])[impact_type].sum().reset_index()
+    df_ssp2_agg = df_ssp2.groupby(["Year", "Metal"])[impact_type].sum().reset_index()
+
+    df_nze_agg["Scenario"] = "Energy transition"
+    df_ssp2_agg["Scenario"] = "Rest of economy"
+
+    df_all = pd.concat([df_nze_agg, df_ssp2_agg], ignore_index=True)
+
+    # Only keep metals present in both scenarios
+    metal_counts = df_all.groupby(["Metal", "Scenario"]).size().unstack().dropna()
+    common_metals = metal_counts.index.tolist()
+    df_all = df_all[df_all["Metal"].isin(common_metals)]
+
+    # Global figure setup
+    metals = sorted(df_all["Metal"].unique())
+    n = len(metals)
+    nrows = math.ceil(n / ncols)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(ncols * 4, nrows * 2.8), squeeze=False)
+
+    # Plot per metal
+    for idx, metal in enumerate(metals):
+        r, c = divmod(idx, ncols)
+        ax = axes[r][c]
+        sub = df_all[df_all["Metal"] == metal]
+        for scenario, marker, color in zip(["Energy transition", "Rest of economy"],
+                                           ['o', 's'],
+                                           ['#31a354', '#de2d26']):
+            scenario_data = sub[sub["Scenario"] == scenario]
+            ax.plot(scenario_data["Year"], scenario_data[impact_type],
+                    label=scenario, marker=marker, color=color, linewidth=1.5)
+        ax.set_title(metal)
+        ax.set_xlabel('')
+        ax.set_ylabel(impact_type if idx % ncols == 0 else "")
+
+    # Remove all unused subplots
+    for idx in range(n, nrows * ncols):
+        r, c = divmod(idx, ncols)
+        fig.delaxes(axes[r][c])
+
+    # Create big legend outside the grid
+    fig.legend(
+        handles=[
+            Line2D([0], [0], color='#31a354', marker='o', label='Energy transition'),
+            Line2D([0], [0], color='#de2d26', marker='s', label='Rest of the economy')
+        ],
+        loc="lower center", ncol=2, frameon=True, edgecolor='black',
+        facecolor='white', fontsize=12, markerscale=1.8,
+        handlelength=2.5, borderpad=1.2
+    )
+
+    plt.tight_layout(rect=[0, 0.05, 1, 1])  # leave space at bottom for legend
+
+    # Save
+    if save_path:
+        fig.savefig(f"{save_path}.pdf", format='pdf', dpi=600)
+        fig.savefig(f"{save_path}.png", format='png', dpi=600)
+
+    plt.show()
+
+
+def plot_stacked_overlay(df_nze, df_ssp2, group_by, value_col, title, y_label,
+                                                        color_palette="tab20", custom_colors=None,
+                                                        nze_color="#000000", threshold=0.01,
+                                                        save_path=None):
+
+
+    # Combine and filter significant metals
+    df_nze = df_nze.copy()
+    df_ssp2 = df_ssp2.copy()
+    df_nze["Scenario"] = "Energy transition"
+    df_ssp2["Scenario"] = "Rest of economy"
+    df_all = pd.concat([df_nze, df_ssp2])
+
+    total_contributions = df_all.groupby(group_by)[value_col].sum()
+    significant = total_contributions[total_contributions / total_contributions.sum() >= threshold].index
+    df_all[group_by] = df_all[group_by].apply(lambda x: x if x in significant else "Other")
+
+    df_nze = df_all[df_all["Scenario"] == "Energy transition"]
+    df_ssp2 = df_all[df_all["Scenario"] == "Rest of economy"]
+
+    # Pivot SSP2
+    df_ssp2_pivot = df_ssp2.groupby(["Year", group_by])[value_col].sum().reset_index() \
+        .pivot(index="Year", columns=group_by, values=value_col).fillna(0)
+    ssp2_sorted_cols = df_ssp2_pivot.sum().sort_values(ascending=False).index
+    df_ssp2_pivot = df_ssp2_pivot[ssp2_sorted_cols]
+
+    # Aggregate NZE total
+    df_nze_total = df_nze.groupby("Year")[value_col].sum().reset_index()
+
+    # Assign colors
+    metals = df_ssp2_pivot.columns
+    if custom_colors:
+        color_dict = {m: custom_colors.get(m, "gray") for m in metals}
+    else:
+        cmap = cm.get_cmap(color_palette, len(metals))
+        color_dict = {m: cmap(i) for i, m in enumerate(metals)}
+
+    # Base arrays
+    x_years = df_nze_total["Year"].to_numpy(dtype=np.float64)
+    ssp2_bottom = np.zeros(len(df_ssp2_pivot))
+    y1_bottom = np.zeros_like(x_years)
+
+    # Stack SSP2 and capture cumulative base
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for metal in ssp2_sorted_cols:
+        y = df_ssp2_pivot[metal].to_numpy(dtype=np.float64)
+        ax.fill_between(df_ssp2_pivot.index, ssp2_bottom, ssp2_bottom + y,
+                        color=color_dict[metal], alpha=0.25, label=metal)
+        ssp2_bottom += y
+    y1_bottom = ssp2_bottom
+
+    # Overlay NZE as a single layer
+    y2_top = y1_bottom + df_nze_total[value_col].to_numpy(dtype=np.float64)
+    ax.fill_between(x_years, y1_bottom, y2_top, color=nze_color, alpha=0.6, label="Energy transition")
+    ax.plot(x_years, y1_bottom, color='black', linewidth=1.0)
+
+    # Formatting
+    ax.set_title(title)
+    ax.set_ylabel(y_label)
+    ax.set_xlabel("")
+    #ax.grid(axis='y', linestyle='--', linewidth=0.5, alpha=0.4)
+
+    # Legend
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), edgecolor='black',
+              title="", fontsize=8)
+    plt.tight_layout()
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        fig.savefig(f"{save_path}.pdf", format="pdf", dpi=600)
+        fig.savefig(f"{save_path}.png", format="png", dpi=600)
+
+    plt.show()

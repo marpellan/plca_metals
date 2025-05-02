@@ -82,26 +82,28 @@ agg_mapping_hh = {'Climate change, human health, long term': 'Climate change',
 
 # Define custom colors for metals
 custom_metal_colors = {
-    "Copper": "#d53e4f",
-    "Aluminium": "#fc8d59",
-    "Nickel": "#fee08b",
-    "Graphite": "#e6f598",
-    "Silicon": "#99d594",
-    "Vanadium": "#3288bd",
-    "Other": "#A9A9A9"  # Generic color for small categories
+    "Copper": "#d73027",
+    "Aluminium": "#f46d43",
+    "Nickel": "#fdae61",
+    "Silicon": "#fee090",
+    "Graphite": "#e0f3f8",
+    "Iridium": "#abd9e9",
+    "PGMs": "#74add1",
+    "Vanadium": "#4575b4",
+    "Other": "#A9A9A9", # Generic color for agg categories
+    "Lead": "#5ab4ac"
 }
 
 
 # Define custom colors for technologies
 custom_tech_colors = {
     "Electricity networks": "#8c510a",
-    "Solar PV": "#bf812d",
-    "Wind": "#dfc27d",
+    "Solar PV": "#d8b365",
     "Electric vehicles": "#f6e8c3",
-    "Battery Storage": "#c7eae5",
-    "Hydrogen technologies": "#80cdc1",
-    "Grid battery storage": "#35978f",
-    "Low emissions power generation": "#01665e" # Generic color for small categories
+    "Wind": "#f5f5f5",
+    "Low emissions power generation": "#c7eae5",
+    "Hydrogen technologies": "#5ab4ac",
+    "Grid battery storage": "#01665e",
 }
 
 
