@@ -101,6 +101,72 @@ def plot_stacked_area(df, group_by, value_col, title, y_label, color_palette="ta
     plt.show()
 
 
+def plot_combined_stacked_area(df, value_cols, group_by_options, titles, y_labels, custom_colors_dict, save_path):
+    """
+    Create a 2x2 grid of stacked area plots: rows = EQ/HH, cols = Technology/Metal.
+    Separate legends are added below for each group_by.
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
+
+    fig, axs = plt.subplots(2, 2, figsize=(10, 6), sharex=True)
+    plt.subplots_adjust(hspace=0.3, wspace=0.2)
+
+    all_handles = {"Technology": [], "Metal": []}
+    all_labels = {"Technology": [], "Metal": []}
+
+    for i, value_col in enumerate(value_cols):  # 0 = EQ, 1 = HH
+        for j, group_by in enumerate(group_by_options):  # 0 = Technology, 1 = Metal
+            ax = axs[i, j]
+            df_grouped = df.groupby(["Year", group_by])[value_col].sum().reset_index()
+
+            # Optional thresholding
+            if group_by == "Metal":
+                total_contributions = df_grouped.groupby(group_by)[value_col].sum()
+                threshold = 0.01
+                significant = total_contributions[total_contributions / total_contributions.sum() >= threshold].index
+                df_grouped[group_by] = df_grouped[group_by].apply(lambda x: x if x in significant else "Other")
+
+            df_pivot = df_grouped.pivot_table(index="Year", columns=group_by, values=value_col, aggfunc="sum")
+            sorted_categories = df_pivot.loc[df_pivot.index.min()].sort_values(ascending=False).index
+            df_pivot = df_pivot[sorted_categories]
+
+            unique_categories = df_pivot.columns
+            custom_colors = custom_colors_dict.get(group_by, {})
+            if custom_colors:
+                color_dict = {cat: custom_colors.get(cat, "gray") for cat in unique_categories}
+            else:
+                cmap = cm.get_cmap("tab20", len(unique_categories))
+                color_dict = {cat: cmap(k) for k, cat in enumerate(unique_categories)}
+
+            colors = [color_dict.get(cat, "gray") for cat in df_pivot.columns]
+            ax.stackplot(df_pivot.index, df_pivot.T, labels=df_pivot.columns, colors=colors, alpha=0.8)
+            ax.set_title(titles[i][j], fontsize=10)
+            ax.set_ylabel(y_labels[i])
+            ax.tick_params(labelsize=8)
+            ax.tick_params(labelbottom=True)
+
+            # Capture legend elements
+            handles, labels = ax.get_legend_handles_labels()
+            all_handles[group_by] = handles
+            all_labels[group_by] = labels
+
+    # Shared legends below the plots
+    tech_legend = fig.legend(
+        all_handles["Technology"], all_labels["Technology"],
+        loc="lower center", bbox_to_anchor=(0.5, -0.08), ncol=3, fontsize=10, title_fontsize=9
+    )
+    metal_legend = fig.legend(
+        all_handles["Metal"], all_labels["Metal"],
+        loc="lower center", bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=10, title_fontsize=9
+    )
+
+    # Save
+    fig.savefig(f"{save_path}.pdf", format="pdf", dpi=600, bbox_inches="tight")
+    fig.savefig(f"{save_path}.png", format="png", dpi=600, bbox_inches="tight")
+    plt.show()
+
+
 def generate_full_color_dict(impact_categories, custom_colors, colormap="tab20"):
     """
     Ensures all impact categories receive a distinct color.
@@ -655,9 +721,9 @@ def plot_lineplot_logscale(df, save_path=None, show=False):
             val_2 = sub[scenario_2].values
 
             ax.plot(years, val_1, marker='o', markersize=4, linestyle=linestyle, linewidth=linewidth,
-                    alpha=alpha, color="#1f77b4", label=f"{scenario_map[scenario_1]} - {sector}")
+                    alpha=alpha, color="#adc698", label=f"{scenario_map[scenario_1]} - {sector}")
             ax.plot(years, val_2, marker='s', markersize=4, linestyle=linestyle, linewidth=linewidth,
-                    alpha=alpha, color="#2ca02c", label=f"{scenario_map[scenario_2]} - {sector}")
+                    alpha=alpha, color="#c05746", label=f"{scenario_map[scenario_2]} - {sector}")
 
             # Fill area (not added to legend)
             ax.fill_between(
@@ -671,8 +737,9 @@ def plot_lineplot_logscale(df, save_path=None, show=False):
             diff_area = np.trapz(val_1 - val_2, x=years)
             x_center = 0.50
             y_offset = 0.5 if sector == "Total energy system" else 0.3
+            unit = ylabels[impact_category]
             ax.annotate(
-                f"{custom_labels[sector]}\nΔ = {diff_area:.1e}",
+                f"{custom_labels[sector]}\nΔ = {diff_area:.1e} {unit}",
                 xy=(x_center, y_offset),
                 xycoords='axes fraction',
                 fontsize=10,
@@ -696,9 +763,9 @@ def plot_lineplot_logscale(df, save_path=None, show=False):
     handles, labels = axes[0].get_legend_handles_labels()
     clean_handles_labels = [(h, l) for h, l in zip(handles, labels) if not l.startswith("Gap:")]
     clean_handles, clean_labels = zip(*clean_handles_labels)
-    fig.legend(clean_handles, clean_labels, loc='center left', bbox_to_anchor=(0.85, 0.5), frameon=False)
+    fig.legend(clean_handles, clean_labels, loc='lower center', bbox_to_anchor=(0.5, -0.08), ncol=2, fontsize=10)
 
-    plt.tight_layout(rect=[0, 0, 0.85, 1])
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
 
     if save_path:
         import os
@@ -963,13 +1030,13 @@ def plot_stacked_overlay(df_nze, df_ssp2, group_by, value_col, title, y_label,
     for metal in ssp2_sorted_cols:
         y = df_ssp2_pivot[metal].to_numpy(dtype=np.float64)
         ax.fill_between(df_ssp2_pivot.index, ssp2_bottom, ssp2_bottom + y,
-                        color=color_dict[metal], alpha=0.25, label=metal)
+                        color=color_dict[metal], alpha=0.8, label=metal)
         ssp2_bottom += y
     y1_bottom = ssp2_bottom
 
     # Overlay NZE as a single layer
     y2_top = y1_bottom + df_nze_total[value_col].to_numpy(dtype=np.float64)
-    ax.fill_between(x_years, y1_bottom, y2_top, color=nze_color, alpha=0.6, label="Energy transition")
+    ax.fill_between(x_years, y1_bottom, y2_top, color=nze_color, alpha=0.8, label="Energy transition")
     ax.plot(x_years, y1_bottom, color='black', linewidth=1.0)
 
     # Formatting
@@ -989,4 +1056,94 @@ def plot_stacked_overlay(df_nze, df_ssp2, group_by, value_col, title, y_label,
         fig.savefig(f"{save_path}.pdf", format="pdf", dpi=600)
         fig.savefig(f"{save_path}.png", format="png", dpi=600)
 
+    plt.show()
+
+def plot_stacked_overlay_subplot(df_nze, df_ssp2,
+                              group_by="Metal",
+                              value_cols=["Total ecosystem quality", "Total human health"],
+                              titles=["EQ damage by metal", "HH damage by metal"],
+                              y_labels=["PDF·m²·yr", "DALY"],
+                              color_palette="tab20",
+                              custom_colors=None,
+                              nze_color="#000000",
+                              threshold=0.01,
+                              save_path=None):
+
+
+    fig, axes = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
+    plt.subplots_adjust(hspace=0.3)
+
+    all_handles = []
+    all_labels = []
+
+    for idx, (value_col, title, y_label) in enumerate(zip(value_cols, titles, y_labels)):
+        ax = axes[idx]
+
+        df_nze_ = df_nze.copy()
+        df_ssp2_ = df_ssp2.copy()
+        df_nze_["Scenario"] = "Energy transition"
+        df_ssp2_["Scenario"] = "Rest of economy"
+        df_all = pd.concat([df_nze_, df_ssp2_])
+
+        total_contributions = df_all.groupby(group_by)[value_col].sum()
+        significant = total_contributions[total_contributions / total_contributions.sum() >= threshold].index
+        df_all[group_by] = df_all[group_by].apply(lambda x: x if x in significant else "Other")
+
+        df_nze_ = df_all[df_all["Scenario"] == "Energy transition"]
+        df_ssp2_ = df_all[df_all["Scenario"] == "Rest of economy"]
+
+        df_ssp2_pivot = df_ssp2_.groupby(["Year", group_by])[value_col].sum().reset_index() \
+            .pivot(index="Year", columns=group_by, values=value_col).fillna(0)
+        ssp2_sorted_cols = df_ssp2_pivot.sum().sort_values(ascending=False).index
+        df_ssp2_pivot = df_ssp2_pivot[ssp2_sorted_cols]
+
+        df_nze_total = df_nze_.groupby("Year")[value_col].sum().reset_index()
+
+        metals = df_ssp2_pivot.columns
+        if custom_colors:
+            color_dict = {m: custom_colors.get(m, "gray") for m in metals}
+        else:
+            cmap = cm.get_cmap(color_palette, len(metals))
+            color_dict = {m: cmap(i) for i, m in enumerate(metals)}
+
+        x_years = df_nze_total["Year"].to_numpy(dtype=np.float64)
+        ssp2_bottom = np.zeros(len(df_ssp2_pivot))
+
+        for metal in ssp2_sorted_cols:
+            y = df_ssp2_pivot[metal].to_numpy(dtype=np.float64)
+            patch = ax.fill_between(df_ssp2_pivot.index, ssp2_bottom, ssp2_bottom + y,
+                                    color=color_dict[metal], alpha=0.8, label=metal)
+            ssp2_bottom += y
+
+        y1_bottom = ssp2_bottom
+        y2_top = y1_bottom + df_nze_total[value_col].to_numpy(dtype=np.float64)
+        ax.fill_between(x_years, y1_bottom, y2_top, color=nze_color, alpha=0.8, label="Energy transition")
+        ax.plot(x_years, y1_bottom, color='black', linewidth=1.0)
+
+        ax.set_title(title, fontsize=11)
+        ax.set_ylabel(y_label)
+        ax.tick_params(labelsize=8)
+        ax.tick_params(labelbottom=True)
+        ax.spines[['top', 'right']].set_visible(False)
+        #ax.grid(axis='y', linestyle='--', linewidth=0.5, alpha=0.3)
+
+        # Collect legend entries once
+        handles, labels = ax.get_legend_handles_labels()
+        all_handles.extend(handles)
+        all_labels.extend(labels)
+
+    # Deduplicate legend items
+    unique_labels = dict(zip(all_labels, all_handles))  # Keeps last occurrence
+    fig.legend(unique_labels.values(), unique_labels.keys(),
+               loc='lower center', bbox_to_anchor=(0.5, -0.08),
+               ncol=3, fontsize=10)
+
+    axes[-1].set_xlabel("")
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        fig.savefig(f"{save_path}.pdf", format="pdf", dpi=600, bbox_inches='tight')
+        fig.savefig(f"{save_path}.png", format="png", dpi=600, bbox_inches='tight')
+
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
     plt.show()

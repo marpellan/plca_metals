@@ -82,16 +82,29 @@ agg_mapping_hh = {'Climate change, human health, long term': 'Climate change',
 
 # Define custom colors for metals
 custom_metal_colors = {
-    "Copper": "#d73027",
-    "Aluminium": "#f46d43",
-    "Nickel": "#fdae61",
+    "Copper": "#a50026",
+    "Aluminium": "#d73027",
+    "Nickel": "#f46d43",
     "Silicon": "#fee090",
     "Graphite": "#e0f3f8",
-    "Iridium": "#abd9e9",
-    "PGMs": "#74add1",
+    "Iridium": "#4575b4",
+    "PGMs": "#313695",
     "Vanadium": "#4575b4",
     "Other": "#A9A9A9", # Generic color for agg categories
-    "Lead": "#5ab4ac"
+}
+
+custom_metal_roe_colors = {
+    "Copper": "#a50026",
+    "Aluminium": "#d73027",
+    "Nickel": "#f46d43",
+    "Chromium": "#fdae61",
+    "Zinc": "#fee090",
+    "Lead": "#e0f3f8",
+    "Magnesium": "#abd9e9",
+    "Silicon": "#74add1",
+    "Iridium": "#4575b4",
+    "PGMs": "#313695",
+    "Other": "#A9A9A9"
 }
 
 
