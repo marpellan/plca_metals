@@ -1,0 +1,75 @@
+Metal,Technology,Market,Reference Product,Location,Scenario,2023,2030,2035,2040,2045,2050
+Aluminium,Electricity networks,"market for aluminium, wrought alloy (SM)","aluminium, wrought alloy",World,NZE,11045666667,17872000000,22818000000,26403000000,25148000000,20759000000
+Arsenic,Solar PV,market for arsine,arsine,GLO,NZE,0,551123,3226120,15291600,12468600,15810800
+Boron,Wind,market for boric oxide,boric oxide,GLO,NZE,206005,705002,706441,625155,611907,865710
+Cadmium,Solar PV,"market for cadmium, semiconductor-grade","cadmium, semiconductor-grade",GLO,NZE,670000,1490000,1420000,1030000,650000,520000
+Cadmium,Low emissions power generation,"market for cadmium, semiconductor-grade","cadmium, semiconductor-grade",GLO,NZE,20000,30000,30000,30000,20000,20000
+Chromium,Wind,"market for ferrochromium, high-carbon, 68% Cr","ferrochromium, high-carbon, 68% Cr",GLO,NZE,63273700,154914000,167174000,146251000,126206000,160709000
+Chromium,Low emissions power generation,"market for ferrochromium, high-carbon, 68% Cr","ferrochromium, high-carbon, 68% Cr",GLO,NZE,148756300,668829000,584868000,480945000,379970000,299482000
+Cobalt,Low emissions power generation,market for cobalt sulfate (SM),cobalt sulfate,World,NZE,16494.5,51267.8,46894.2,36475.8,27891.7,25334.3
+Cobalt,Electric vehicles,market for cobalt sulfate (SM),cobalt sulfate,World,NZE,61840900,236409000,247364000,278864000,313127000,322573000
+Cobalt,Grid battery storage,market for cobalt sulfate (SM),cobalt sulfate,World,NZE,2527830,6633850,5560780,0,0,0
+Cobalt,Hydrogen technologies,market for cobalt sulfate (SM),cobalt sulfate,World,NZE,5114.03,64258.5,69753.1,59512.1,51073.8,65994.7
+Copper,Solar PV,"market for copper, cathode (SM)","copper, cathode",World,NZE,1208230000,2564330000,2651290000,2245300000,1840510000,2390460000
+Copper,Wind,"market for copper, cathode (SM)","copper, cathode",World,NZE,501618000,1419330000,1445270000,1242850000,1107760000,1451290000
+Copper,Low emissions power generation,"market for copper, cathode (SM)","copper, cathode",World,NZE,82822000,229270000,222860000,183050000,150510000,130460000
+Copper,Electric vehicles,"market for copper, cathode (SM)","copper, cathode",World,NZE,395950000,2611540000,4028100000,4642250000,5043910000,5123730000
+Copper,Grid battery storage,"market for copper, cathode (SM)","copper, cathode",World,NZE,39596600,281990000,443253000,654388000,745109000,897638000
+Copper,Electricity networks,"market for copper, cathode (SM)","copper, cathode",World,NZE,4143480000,7939650000,9793410000,10510100000,10437800000,9245510000
+Copper,Hydrogen technologies,"market for copper, cathode (SM)","copper, cathode",World,NZE,2122.89,187135,203227,173466,148932,192520
+Dysprosium,Wind,market for dysprosium oxide,dysprosium oxide,GLO,NZE,800000,2340000,2320000,1970000,1770000,2310000
+Dysprosium,Electric vehicles,market for dysprosium oxide,dysprosium oxide,GLO,NZE,530000,2550000,3610000,3740000,3940000,4060000
+Gallium,Solar PV,"market for gallium, semiconductor-grade","gallium, semiconductor-grade",GLO,NZE,15553.9,250526,1316150,6124140,4988810,6322200
+Graphite,Electric vehicles,"market for graphite, battery grade","graphite, battery grade",CN,NZE,685564000,4537460000,6083980000,5777930000,4660410000,3593250000
+Graphite,Grid battery storage,"market for graphite, battery grade","graphite, battery grade",CN,NZE,86618600,486902000,698656000,929261000,981790000,1115710000
+Hafnium,Low emissions power generation,market for hafnium sponge,hafnium sponge,GLO,NZE,7904.03,16231.4,16723.9,12512.6,10591.6,9136.54
+Indium,Solar PV,market for indium,indium,GLO,NZE,70000,120000,130000,170000,120000,150000
+Indium,Low emissions power generation,market for indium,indium,GLO,NZE,30000,50000,60000,40000,40000,30000
+Iridium,Hydrogen technologies,"platinum group metal, extraction and refinery operations",iridium,RU,NZE,198.936,7724.9,6816.58,4475.84,2690.11,1987.19
+Lanthanum,Low emissions power generation,market for lanthanum oxide,lanthanum oxide,GLO,NZE,3024.92,80591.7,63435.7,54332.7,46804.6,60699.3
+Lead,Solar PV,market for lead,lead,GLO,NZE,2010000,4570000,4760000,4020000,3280000,4160000
+Lead,Low emissions power generation,market for lead,lead,GLO,NZE,10500000,27000000,21500000,17700000,15700000,14300000
+Lithium,Electric vehicles,"market for lithium carbonate, battery grade (SM)","lithium carbonate, battery grade",World,NZE,82852700,559744000,908983000,1205810000,1410260000,1446840000
+Lithium,Grid battery storage,"market for lithium carbonate, battery grade (SM)","lithium carbonate, battery grade",World,NZE,9219560,55847600,77235800,102087000,112003000,126312000
+Magnesium,Low emissions power generation,market for magnesium,magnesium,GLO,NZE,8055250,30949800,54578100,54179800,42314000,33632400
+Manganese,Wind,market for manganese sulfate,manganese sulfate,GLO,NZE,100485000,242800000,262228000,228703000,196617000,249564000
+Manganese,Low emissions power generation,market for manganese sulfate,manganese sulfate,GLO,NZE,21544000,93848000,133185000,128043000,99763000,78680000
+Manganese,Electric vehicles,market for manganese sulfate,manganese sulfate,GLO,NZE,57031600,518434000,1121900000,1762730000,2258650000,2723170000
+Manganese,Grid battery storage,market for manganese sulfate,manganese sulfate,GLO,NZE,2661310,6184690,5184280,0,0,0
+Molybdenum,Solar PV,market for molybdenite,molybdenite,GLO,NZE,259011,540838,538619,441696,296425,345091
+Molybdenum,Wind,market for molybdenite,molybdenite,GLO,NZE,13239700,32352000,34916700,30532800,26333500,33517100
+Molybdenum,Low emissions power generation,market for molybdenite,molybdenite,GLO,NZE,15370689,71476162,56589881,45721604,36505675,28981509
+Neodymium,Wind,market for neodymium oxide,neodymium oxide,GLO,NZE,7434920,22004800,21179200,17588800,15569700,19811400
+Neodymium,Electric vehicles,market for neodymium oxide,neodymium oxide,GLO,NZE,5164000,25745000,36685800,37832600,39854000,41041200
+Nickel,Solar PV,market for ferronickel,ferronickel,GLO,NZE,434666,990135,1031970,870808,707078,893511
+Nickel,Wind,market for ferronickel,ferronickel,GLO,NZE,45739200,105425000,115437000,100648000,84446600,104668000
+Nickel,Low emissions power generation,"market for nickel, class 1 (SM)","nickel, class 1",World,NZE,119196134,759818865,613733030,492492192,374444322,279146489
+Nickel,Electric vehicles,"market for nickel, class 1 (SM)","nickel, class 1",World,NZE,299268000,1825340000,2590010000,2921330000,2933510000,2634180000
+Nickel,Grid battery storage,"market for nickel, class 1 (SM)","nickel, class 1",World,NZE,12105800,28193100,25242600,0,0,0
+Nickel,Hydrogen technologies,"market for nickel, class 1 (SM)","nickel, class 1",World,NZE,955346,73976700,80141600,68261800,58484700,75442800
+Niobium,Low emissions power generation,"market for ferroniobium, 66% Nb","ferroniobium, 66% Nb",GLO,NZE,362905,1974960,2944910,2867720,2198950,1701130
+PGMs,Hydrogen technologies,market for platinum,platinum,GLO,NZE,977.366,32054.5,60859.1,91245.5,98639.5,87478
+Praseodymium,Wind,market for praseodymium oxide,praseodymium oxide,GLO,NZE,1230000,4040000,3970000,3440000,3280000,4530000
+Praseodymium,Electric vehicles,market for praseodymium oxide,praseodymium oxide,GLO,NZE,770000,3860000,5500000,5670000,5980000,6160000
+Selenium,Solar PV,market for selenium,selenium,GLO,NZE,132335,258088,233784,167636,91445.2,73190
+Silicon,Solar PV,"market for silicon, metallurgical grade","silicon, metallurgical grade",GLO,NZE,1109910000,1848560000,1793050000,1446980000,1106550000,1334160000
+Silicon,Electric vehicles,"market for silicon, metallurgical grade","silicon, metallurgical grade",GLO,NZE,15953000,176042000,453049000,640509000,920296000,1116720000
+Silicon,Grid battery storage,"market for silicon, metallurgical grade","silicon, metallurgical grade",GLO,NZE,238354,5189230,9865870,17666700,23954900,29093600
+Silver,Solar PV,market for silver,silver,GLO,NZE,6424200,11494400,9558420,5944280,3046490,1504270
+Silver,Low emissions power generation,market for silver,silver,GLO,NZE,47440,176200,331960,326970,253260,199600
+Tantalum,Low emissions power generation,"market for tantalum powder, capacitor-grade","tantalum powder, capacitor-grade",GLO,NZE,58660.7,437610,335397,266371,200396,146576
+Tellurium,Solar PV,"market for tellurium, semiconductor-grade","tellurium, semiconductor-grade",GLO,NZE,696188,1550570,1475590,1072530,673667,535772
+Terbium,Wind,market for terbium oxide,terbium oxide,GLO,NZE,280000,890000,900000,800000,770000,1080000
+Terbium,Electric vehicles,market for terbium oxide,terbium oxide,GLO,NZE,110000,530000,760000,780000,820000,850000
+Tin,Solar PV,market for tin,tin,GLO,NZE,2070000,4760000,4980000,4220000,3440000,4370000
+Tin,Low emissions power generation,market for tin,tin,GLO,NZE,80000,160000,160000,120000,100000,90000
+Titanium,Low emissions power generation,market for titanium,titanium,GLO,NZE,5208690,22692700,19177500,15070600,11443700,9475680
+Tungsten,Low emissions power generation,market for tungsten carbide powder,tungsten carbide powder,GLO,NZE,82333.6,169077,174207,130340,110329,95172.3
+Vanadium,Grid battery storage,vanadium pentoxide production,vanadium pentoxide,ZA,NZE,14047.2,35268700,272391000,556407000,636594000,773134000
+Yttrium,Low emissions power generation,market for yttrium oxide,yttrium oxide,GLO,NZE,10000,20000,20000,10000,10000,10000
+Yttrium,Hydrogen technologies,market for yttrium oxide,yttrium oxide,GLO,NZE,0,10000,10000,0,0,0
+Zinc,Solar PV,market for zinc,zinc,GLO,NZE,10452300,23967800,25097800,21280500,17351900,22003100
+Zinc,Wind,market for zinc,zinc,GLO,NZE,704627000,1699650000,1835850000,1600500000,1375270000,1744870000
+Zinc,Low emissions power generation,market for zinc,zinc,GLO,NZE,15886700,46892200,52812200,48449500,39958100,33866900
+Zirconium,Low emissions power generation,market for zirconium oxide,zirconium oxide,GLO,NZE,500000,1030000,1060000,800000,670000,580000
+Zirconium,Hydrogen technologies,market for zirconium oxide,zirconium oxide,GLO,NZE,130000,10110000,10930000,9300000,7970000,10270000

@@ -27,87 +27,22 @@ sns.reset_orig()
 
 
 ### FUNCTIONS
-def plot_stacked_area(df, group_by, value_col, title, y_label, color_palette="tab20", custom_colors=None,
-                      threshold=0.01, save_path="plots/stacked_area"):
-    """
-    Generate a stacked area plot with optional custom colors and conditional aggregation.
-
-    Parameters:
-    - df: DataFrame with data
-    - group_by: Column to group by ('Metal' or 'Technology')
-    - value_col: Column containing impact values
-    - title: Plot title
-    - y_label: Label for Y-axis (e.g., "Impact (unit)")
-    - color_palette: Colormap name for automatic coloring (default: "tab20")
-    - custom_colors: Dict with manual colors (e.g., {"Solar PV": "#1f77b4"})
-    - threshold: Threshold for grouping small categories into "Other" (applies only to Metals, not Technologies)
-    - save_path: Base filename for saving plots (without extension)
-
-    Outputs:
-    - Saves PDF and PNG versions of the figure
-    """
-
-    # Ensure directory exists
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-
-    # Aggregate data
-    df_grouped = df.groupby(["Year", group_by])[value_col].sum().reset_index()
-
-    # Apply threshold only for Metals, keep all Technologies
-    if group_by == "Metal":
-        total_contributions = df_grouped.groupby(group_by)[value_col].sum()
-        significant_categories = total_contributions[total_contributions / total_contributions.sum() >= threshold].index
-        df_grouped[group_by] = df_grouped[group_by].apply(lambda x: x if x in significant_categories else "Other")
-
-    # Pivot for stacked area plot
-    df_pivot = df_grouped.pivot_table(index="Year", columns=group_by, values=value_col, aggfunc="sum")
-
-    # Sort categories based on first year's contribution (largest to smallest)
-    first_year = df_pivot.index.min()
-    sorted_categories = df_pivot.loc[first_year].sort_values(ascending=False).index
-    df_pivot = df_pivot[sorted_categories]
-
-    # Assign colors (Fix: Apply to both Metals & Technologies)
-    unique_categories = df_pivot.columns
-    if custom_colors:
-        # Apply user-defined colors for both Metals & Technologies
-        color_dict = {cat: custom_colors.get(cat, "gray") for cat in unique_categories}
-    else:
-        # Otherwise, use colormap
-        cmap = cm.get_cmap(color_palette, len(unique_categories))
-        color_dict = {cat: cmap(i) for i, cat in enumerate(unique_categories)}
-
-    # Generate plot
-    fig, ax = plt.subplots(figsize=(7.2, 4.5))
-    colors = [color_dict.get(col, "gray") for col in df_pivot.columns]
-    ax.stackplot(df_pivot.index, df_pivot.T, labels=df_pivot.columns, colors=colors, alpha=0.8)
-
-    # Formatting
-    ax.set_title(title)
-    ax.set_ylabel(y_label)
-
-    # Sort legend in the same order as the stacked areas
-    handles, labels = ax.get_legend_handles_labels()
-    legend_order = [labels.index(cat) for cat in sorted_categories if cat in labels]
-    sorted_handles = [handles[i] for i in legend_order]
-    sorted_labels = [labels[i] for i in legend_order]
-
-    ax.legend(sorted_handles, sorted_labels, loc="upper left", bbox_to_anchor=(1, 1))
-    plt.tight_layout()
-
-    # Save figures
-    plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600)
-    plt.savefig(f"{save_path}.png", format="png", dpi=600)
-    plt.show()
-
-
 def plot_combined_stacked_area(df, value_cols, group_by_options, titles, y_labels, custom_colors_dict, save_path):
     """
     Create a 2x2 grid of stacked area plots: rows = EQ/HH, cols = Technology/Metal.
     Separate legends are added below for each group_by.
     """
-    import matplotlib.pyplot as plt
-    import matplotlib.cm as cm
+
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+    rcParams['text.usetex'] = False
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 6), sharex=True)
     plt.subplots_adjust(hspace=0.3, wspace=0.2)
@@ -125,7 +60,7 @@ def plot_combined_stacked_area(df, value_cols, group_by_options, titles, y_label
                 total_contributions = df_grouped.groupby(group_by)[value_col].sum()
                 threshold = 0.01
                 significant = total_contributions[total_contributions / total_contributions.sum() >= threshold].index
-                df_grouped[group_by] = df_grouped[group_by].apply(lambda x: x if x in significant else "Other")
+                df_grouped[group_by] = df_grouped[group_by].apply(lambda x: x if x in significant else "Others")
 
             df_pivot = df_grouped.pivot_table(index="Year", columns=group_by, values=value_col, aggfunc="sum")
             sorted_categories = df_pivot.loc[df_pivot.index.min()].sort_values(ascending=False).index
@@ -154,11 +89,11 @@ def plot_combined_stacked_area(df, value_cols, group_by_options, titles, y_label
     # Shared legends below the plots
     tech_legend = fig.legend(
         all_handles["Technology"], all_labels["Technology"],
-        loc="lower center", bbox_to_anchor=(0.5, -0.08), ncol=3, fontsize=10, title_fontsize=9
+        loc="lower left", bbox_to_anchor=(0.2, -0.25), ncol=1, fontsize=10, title_fontsize=9
     )
     metal_legend = fig.legend(
         all_handles["Metal"], all_labels["Metal"],
-        loc="lower center", bbox_to_anchor=(0.5, -0.20), ncol=3, fontsize=10, title_fontsize=9
+        loc="lower right", bbox_to_anchor=(0.8, -0.25), ncol=1, fontsize=10, title_fontsize=9
     )
 
     # Save
@@ -167,198 +102,192 @@ def plot_combined_stacked_area(df, value_cols, group_by_options, titles, y_label
     plt.show()
 
 
-def generate_full_color_dict(impact_categories, custom_colors, colormap="tab20"):
-    """
-    Ensures all impact categories receive a distinct color.
-
-    - Uses predefined colors for important categories.
-    - Assigns unique colors to remaining categories from a colormap.
-
-    Parameters:
-    - impact_categories: List of all impact categories
-    - custom_colors: Dictionary of manually defined colors for key categories
-    - colormap: Matplotlib colormap to use for additional categories
-
-    Returns:
-    - A complete color dictionary for all impact categories
-    """
-
-    # Get a colormap with enough distinct colors
-    cmap = cm.get_cmap(colormap, len(impact_categories))
-
-    # Start with predefined colors
-    full_color_dict = custom_colors.copy()
-
-    # Assign unique colors to missing categories
-    for i, cat in enumerate(impact_categories):
-        if cat not in full_color_dict:
-            full_color_dict[cat] = cmap(i)  # Assign a unique color
-
-    return full_color_dict
-
-
-def plot_stacked_bar(df, impact_columns, total_col, title, y_label="Percentage contribution (%)",
-                     color_palette="tab20", custom_colors=None, threshold=0.03, save_path="plots/stacked_bar"):
+def plot_midpoint_contribution(df, impact_columns, total_col, title, y_label="Percentage contribution (%)",
+                               mapping_dict=None, threshold=0.01, save_path="plots/stacked_bar"):
     """
     Generate a stacked bar plot showing the contribution of different midpoint indicators to the total impact.
-    Contributors below a threshold (default: 5%) are grouped into "Other".
+    Contributors below a threshold are grouped into "Others".
 
     Parameters:
     - df: DataFrame with data
-    - impact_columns: List of midpoint impact indicators (e.g., EQ or HH categories)
-    - total_col: Column containing the total impact for normalization (e.g., 'Total ecosystem quality' or 'Total human health')
+    - impact_columns: List of original midpoint impact indicators
+    - total_col: Column containing the total impact for normalization
     - title: Plot title
-    - y_label: Label for Y-axis (default: "Percentage contribution (%)")
-    - color_palette: Colormap name for automatic coloring (default: "tab20") if no custom colors are provided
-    - custom_colors: Dictionary with predefined colors for certain categories
-    - threshold: Minimum percentage contribution to remain separate; others are grouped into "Other"
-    - save_path: Base filename for saving plots (without extension)
+    - y_label: Label for Y-axis
+    - mapping_dict: Dictionary mapping original categories to aggregated ones
+    - threshold: Minimum percentage contribution to remain separate
+    - save_path: Base filename for saving plots
 
     Outputs:
     - Saves PDF and PNG versions of the figure
     """
 
-    # Ensure directory exists
+    from constants import mp_color_dict
+
+    # Font and style setup
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    # Aggregate data by year
+    # Step 1: Aggregate impact columns if a mapping is provided
+    if mapping_dict:
+        agg_df = pd.DataFrame(index=df.index)
+        for original, aggregated in mapping_dict.items():
+            if original in df.columns:
+                if aggregated not in agg_df.columns:
+                    agg_df[aggregated] = df[original]
+                else:
+                    agg_df[aggregated] += df[original]
+        df = pd.concat([df.drop(columns=[col for col in impact_columns if col in df.columns]), agg_df], axis=1)
+        impact_columns = sorted(set(mapping_dict.values()))
+
+    # Step 2: Aggregate by year
     df_grouped = df.groupby("Year")[impact_columns + [total_col]].sum()
 
-    # Convert to percentage of total impact
+    # Step 3: Normalize to percentage
     df_percent = df_grouped[impact_columns].div(df_grouped[total_col], axis=0) * 100
 
-    # Identify small contributors to group into "Other"
-    total_contributions = df_percent.mean()  # Average over time for consistency
-    significant_categories = total_contributions[total_contributions >= (threshold * 100)].index.tolist()
+    # Step 4: Apply threshold and group small ones into "Others"
+    total_contributions = df_percent.mean()
+    significant_categories = total_contributions[total_contributions >= threshold * 100].index.tolist()
+    df_percent["Others"] = df_percent.drop(columns=significant_categories).sum(axis=1)
+    df_percent = df_percent[significant_categories + ["Others"]]
 
-    # Group small contributors into "Other"
-    df_percent["Other"] = df_percent.drop(columns=significant_categories).sum(axis=1)
-    df_percent = df_percent[significant_categories + ["Other"]]
-
-    # Sort categories based on first year's contribution (largest to smallest)
+    # Step 5: Sort categories by first year
     first_year = df_percent.index.min()
     sorted_categories = df_percent.loc[first_year].sort_values(ascending=False).index
     df_percent = df_percent[sorted_categories]
 
-    # Assign colors: use custom colors if provided, else use a colormap
-    if custom_colors:
-        color_dict = {cat: custom_colors.get(cat, "gray") for cat in sorted_categories}
-    else:
-        color_dict = generate_full_color_dict(sorted_categories, {}, color_palette)
+    # Step 6: Fixed color dictionary
+    mp_color_dict = mp_color_dict
+    color_dict = {cat: mp_color_dict.get(cat, "#BBBBBB") for cat in df_percent.columns}
 
-    # Ensure "Other" has a distinct neutral color
-    color_dict["Other"] = "#2b2d42"  # Dark Gray for clarity
-
-    # Generate plot
+    # Step 7: Plot
     fig, ax = plt.subplots(figsize=(7.2, 5))
     colors = [color_dict[col] for col in df_percent.columns]
     df_percent.plot(kind="bar", stacked=True, color=colors, ax=ax, width=0.8)
 
-    # Formatting
-    ax.set_title(title, fontsize=12)
     ax.set_ylabel(y_label, fontsize=10)
     ax.set_xlabel("")
     ax.set_xticklabels(df_percent.index, rotation=360)
 
-    # Legend formatting: Reduce size, place below if necessary
-    # ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=3, fontsize=6, frameon=False)
-    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), fontsize=8, frameon=False)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=3, fontsize=8, frameon=False)
 
     plt.tight_layout()
-
-    # Save figures
     plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600)
     plt.savefig(f"{save_path}.png", format="png", dpi=600)
     plt.show()
 
 
-def plot_cumulative_midpoint_contribution(df, impact_columns, total_col, title, y_label="Percentage contribution (%)",
-                                          color_palette="tab20", custom_colors=None, threshold=0.03,
+def plot_cumulative_midpoint_contribution(df, impact_columns, total_col, title,
+                                          y_label="Percentage contribution (%)",
+                                          mapping_dict=None, threshold=0.01,
                                           save_path="plots/cumulative_midpoint"):
     """
-    Generate a bar plot showing the cumulative contribution of different midpoint indicators to the total impact from 2022-2050.
-    Bars represent the mean contribution, with a line showing min-max variation. Contributors below a threshold (default: 5%)
-    are grouped into "Other".
+    Generate a cumulative bar plot of midpoint contributions with error bars (min/max over time).
+    Contributors below a threshold are grouped into "Others".
 
     Parameters:
-    - df: DataFrame with data
-    - impact_columns: List of midpoint impact indicators (e.g., EQ or HH categories)
-    - total_col: Column containing the total impact for normalization (e.g., 'Total ecosystem quality' or 'Total human health')
+    - df: DataFrame with midpoint and total values
+    - impact_columns: Original midpoint columns (pre-aggregation)
+    - total_col: Name of the column with total impact values
     - title: Plot title
-    - y_label: Label for Y-axis (default: "Percentage contribution (%)")
-    - color_palette: Colormap name for automatic coloring (default: "tab20") if no custom colors are provided
-    - custom_colors: Dictionary with predefined colors for certain categories
-    - threshold: Minimum percentage contribution to remain separate; others are grouped into "Other"
-    - save_path: Base filename for saving plots (without extension)
+    - y_label: Y-axis label
+    - mapping_dict: Dictionary to aggregate original midpoint columns into fewer categories
+    - threshold: Minimum contribution to appear individually
+    - save_path: Path prefix for saving plots (without extension)
 
     Outputs:
-    - Saves PDF and PNG versions of the figure
+    - Saves PDF and PNG plots
     """
 
-    # Ensure directory exists
+    from constants import mp_color_dict
+
+    # Font settings
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    # Aggregate data over all years (2022-2050)
+    # Step 1: Aggregate midpoint categories if mapping provided
+    if mapping_dict:
+        agg_df = pd.DataFrame(index=df.index)
+        for orig, agg in mapping_dict.items():
+            if orig in df.columns:
+                if agg not in agg_df.columns:
+                    agg_df[agg] = df[orig]
+                else:
+                    agg_df[agg] += df[orig]
+        df = pd.concat([df.drop(columns=[col for col in impact_columns if col in df.columns]), agg_df], axis=1)
+        impact_columns = sorted(set(mapping_dict.values()))
+
+    # Step 2: Group by year
     df_grouped = df.groupby("Year")[impact_columns + [total_col]].sum()
 
-    # Convert to percentage of total impact
+    # Step 3: Normalize by total
     df_percent = df_grouped[impact_columns].div(df_grouped[total_col], axis=0) * 100
 
-    # Compute mean, min, and max contributions over time
+    # Step 4: Compute stats
     mean_contributions = df_percent.mean()
     min_contributions = df_percent.min()
     max_contributions = df_percent.max()
 
-    # Identify small contributors to group into "Other"
-    significant_categories = mean_contributions[mean_contributions >= (threshold * 100)].index.tolist()
+    # Step 5: Group small categories into "Others"
+    significant_categories = mean_contributions[mean_contributions >= threshold * 100].index.tolist()
+    df_percent["Others"] = df_percent.drop(columns=significant_categories).sum(axis=1)
+    mean_contributions["Others"] = df_percent["Others"].mean()
+    min_contributions["Others"] = df_percent["Others"].min()
+    max_contributions["Others"] = df_percent["Others"].max()
 
-    # Group small contributors into "Other"
-    df_percent["Other"] = df_percent.drop(columns=significant_categories).sum(axis=1)
-    mean_contributions["Other"] = df_percent["Other"].mean()
-    min_contributions["Other"] = df_percent["Other"].min()
-    max_contributions["Other"] = df_percent["Other"].max()
+    mean_contributions = mean_contributions[significant_categories + ["Others"]]
+    min_contributions = min_contributions[significant_categories + ["Others"]]
+    max_contributions = max_contributions[significant_categories + ["Others"]]
 
-    # Keep only significant contributors + "Other"
-    mean_contributions = mean_contributions[significant_categories + ["Other"]]
-    min_contributions = min_contributions[significant_categories + ["Other"]]
-    max_contributions = max_contributions[significant_categories + ["Other"]]
-
-    # Sort categories by mean contribution
+    # Step 6: Sort
     sorted_categories = mean_contributions.sort_values(ascending=False).index
     mean_contributions = mean_contributions[sorted_categories]
     min_contributions = min_contributions[sorted_categories]
     max_contributions = max_contributions[sorted_categories]
 
-    # Assign colors: use custom colors if provided, else use a colormap
-    if custom_colors:
-        color_dict = {cat: custom_colors.get(cat, "gray") for cat in sorted_categories}
-    else:
-        cmap = cm.get_cmap(color_palette, len(sorted_categories))
-        color_dict = {cat: cmap(i) for i, cat in enumerate(sorted_categories)}
+    # Step 7: Fixed color mapping
+    mp_color_dict = mp_color_dict
+    color_dict = {cat: mp_color_dict.get(cat, "#BBBBBB") for cat in sorted_categories}
 
-    # Ensure "Other" has a distinct neutral color
-    color_dict["Other"] = "#A9A9A9"  # Dark Gray for clarity
-
-    # Generate plot
+    # Step 8: Plot
     fig, ax = plt.subplots(figsize=(9, 5))
     x_positions = np.arange(len(sorted_categories))
     colors = [color_dict[col] for col in sorted_categories]
 
-    # Plot bars (mean values)
+    # Bars
     bars = ax.bar(x_positions, mean_contributions, color=colors, alpha=0.8)
 
-    # Add min-max variation as a line
-    ax.errorbar(x_positions, mean_contributions,
-                yerr=[mean_contributions - min_contributions, max_contributions - mean_contributions],
-                fmt='none', ecolor='black', capsize=4, elinewidth=1)
+    # Error bars
+    ax.errorbar(
+        x_positions, mean_contributions,
+        yerr=[mean_contributions - min_contributions, max_contributions - mean_contributions],
+        fmt='none', ecolor='black', capsize=4, elinewidth=1
+    )
 
-    # Formatting
-    ax.set_title(title, fontsize=12)
+    # Labels
     ax.set_ylabel(y_label, fontsize=10)
     ax.set_xticks(x_positions)
-    ax.set_xticklabels(sorted_categories, rotation=90, ha="right", fontsize=8)
+    ax.set_xticklabels(sorted_categories, rotation=45, ha="right", fontsize=8)
 
-    # Save figures
     plt.tight_layout()
     plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600)
     plt.savefig(f"{save_path}.png", format="png", dpi=600)
@@ -397,6 +326,17 @@ def create_sankey(
                "Iridium":"PGM",   "Platinum":"PGM"}
     """
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+    rcParams['text.usetex'] = False
 
     # 0) apply metal aggregation if requested
     df_proc = df.copy()
@@ -487,188 +427,8 @@ def create_sankey(
     return fig
 
 
-def plot_lineplot_burden_comparison(df, save_path=None, show=True):
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import pandas as pd
-    import os
-
-    # Matplotlib formatting for Joule-quality figures
-    from matplotlib import rcParams
-    rcParams['pdf.fonttype'] = 42
-    rcParams['ps.fonttype'] = 42
-    rcParams['font.family'] = 'Arial'
-    rcParams['font.size'] = 10
-    rcParams['axes.labelsize'] = 10
-    rcParams['legend.fontsize'] = 9
-    rcParams['xtick.labelsize'] = 9
-    rcParams['ytick.labelsize'] = 9
-    rcParams['axes.titlesize'] = 12
-
-    # Pivot and clean
-    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
-    pivot_df = df.pivot_table(
-        index=["Year", "Sector", "Impact category"],
-        columns="Scenario",
-        values="Impact value"
-    ).reset_index()
-    pivot_df.columns.name = None
-    scenario_1, scenario_2 = pivot_df.columns[3:]
-
-    scenario_map = {
-        "Net Zero Emissions by 2050 Scenario": "NZS",
-        "Stated Policies Scenario": "STEPS"
-    }
-
-    pivot_df[scenario_1] = pd.to_numeric(pivot_df[scenario_1], errors="coerce")
-    pivot_df[scenario_2] = pd.to_numeric(pivot_df[scenario_2], errors="coerce")
-
-    hh_df = pivot_df[pivot_df["Impact category"] == "Climate change (HH)"]
-    eq_df = pivot_df[pivot_df["Impact category"] == "Climate change (EQ)"]
-
-    sns.set_style("white")
-    fig, axes = plt.subplots(2, 2, figsize=(10, 6), sharex=True)
-    fig.subplots_adjust(hspace=0.35, wspace=0.25)
-
-    panels = [
-        (hh_df, "Energy transition", axes[0, 0], "Human Health (HH)", "DALY"),
-        (hh_df, "Total energy system", axes[0, 1], "Human Health (HH)", ""),
-        (eq_df, "Energy transition", axes[1, 0], "Ecosystem Quality (EQ)", "PDF·m²·yr"),
-        (eq_df, "Total energy system", axes[1, 1], "Ecosystem Quality (EQ)", "")
-    ]
-
-    handles_created = False
-    all_handles, all_labels = [], []
-
-    for df_part, sector, ax, title, ylabel in panels:
-        sub = df_part[df_part["Sector"] == sector].dropna(subset=[scenario_1, scenario_2]).sort_values("Year")
-        years = sub["Year"].values
-        val_1 = sub[scenario_1].values
-        val_2 = sub[scenario_2].values
-
-        line1, = ax.plot(years, val_1, marker='o', color="#1f77b4", label=scenario_map.get(scenario_1, scenario_1))
-        line2, = ax.plot(years, val_2, marker='s', color="#2ca02c", label=scenario_map.get(scenario_2, scenario_2))
-        ax.fill_between(years, val_1, val_2, color="#b2df8a", alpha=0.5)
-
-        ax.set_title(f"{title} – {sector}")
-        ax.set_ylabel(ylabel)
-        ax.set_xlabel("")
-        ax.set_xticks(years)
-        ax.set_xticklabels([int(y) for y in years])
-        ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-        ax.spines[['top', 'right']].set_visible(False)
-
-        # Only collect legend handles once
-        if not handles_created:
-            all_handles.extend([line1, line2])
-            all_labels.extend([scenario_map.get(scenario_1), scenario_map.get(scenario_2)])
-            patch = plt.Line2D([0], [0], color="#b2df8a", lw=6, alpha=0.5)
-            all_handles.append(patch)
-            all_labels.append("Difference")
-            handles_created = True
-
-    plt.tight_layout(rect=[0, 0.05, 1, 1])  # Room for legend
-
-    # One shared legend below
-    fig.legend(all_handles, all_labels,
-               loc='lower center',
-               bbox_to_anchor=(0.5, -0.01),
-               ncol=3,
-               frameon=False)
-
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True)
-        plt.savefig(f"{save_path}.png", format="png", dpi=600)
-
-    if show:
-        plt.show()
-    else:
-        plt.close()
-
-
-def plot_lineplot_burden_comparison_combined(df, save_path=None, show=True):
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import pandas as pd
-    import os
-
-    from matplotlib import rcParams
-    rcParams['pdf.fonttype'] = 42
-    rcParams['ps.fonttype'] = 42
-    rcParams['font.family'] = 'Arial'
-    rcParams['font.size'] = 10
-    rcParams['axes.labelsize'] = 10
-    rcParams['legend.fontsize'] = 9
-    rcParams['xtick.labelsize'] = 9
-    rcParams['ytick.labelsize'] = 9
-    rcParams['axes.titlesize'] = 12
-
-    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
-    pivot_df = df.pivot_table(
-        index=["Year", "Sector", "Impact category"],
-        columns="Scenario",
-        values="Impact value"
-    ).reset_index()
-    pivot_df.columns.name = None
-    scenario_1, scenario_2 = pivot_df.columns[3:]
-
-    scenario_map = {
-        "Net Zero Emissions by 2050 Scenario": "NZS",
-        "Stated Policies Scenario": "STEPS"
-    }
-
-    pivot_df[scenario_1] = pd.to_numeric(pivot_df[scenario_1], errors="coerce")
-    pivot_df[scenario_2] = pd.to_numeric(pivot_df[scenario_2], errors="coerce")
-
-    impact_categories = ["Climate change (HH)", "Climate change (EQ)"]
-    ylabels = {"Climate change (HH)": "DALY", "Climate change (EQ)": "PDF·m²·yr"}
-
-    sns.set_style("white")
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True)
-    fig.subplots_adjust(hspace=0.35, wspace=0.25)
-
-    for idx, impact_category in enumerate(impact_categories):
-        ax = axes[idx]
-        sub_df = pivot_df[pivot_df["Impact category"] == impact_category]
-
-        for sector, linestyle, marker in zip(["Total energy system", "Energy transition"], ["-", "--"], ['o', None]):
-            sub = sub_df[sub_df["Sector"] == sector].dropna(subset=[scenario_1, scenario_2]).sort_values("Year")
-            years = sub["Year"].values
-            val_1 = sub[scenario_1].values
-            val_2 = sub[scenario_2].values
-
-            ax.plot(years, val_1, marker=marker, linestyle=linestyle, color="#1f77b4",
-                    label=f"{scenario_map[scenario_1]} - {sector}")
-            ax.plot(years, val_2, marker=marker, linestyle=linestyle, color="#2ca02c",
-                    label=f"{scenario_map[scenario_2]} - {sector}")
-            ax.fill_between(years, val_1, val_2, color="#b2df8a", alpha=0.3)
-
-        ax.set_title(impact_category)
-        ax.set_ylabel(ylabels[impact_category])
-        ax.set_xlabel("Year")
-        ax.set_xticks(years)
-        ax.set_xticklabels([int(y) for y in years])
-        ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-        ax.spines[['top', 'right']].set_visible(False)
-
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='lower center', bbox_to_anchor=(0.5, -0.02), ncol=2, frameon=False)
-
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True)
-        plt.savefig(f"{save_path}.png", format="png", dpi=600)
-
-    if show:
-        plt.show()
-    else:
-        plt.close()
-
-
 def plot_lineplot_logscale(df, save_path=None, show=False):
+
     rcParams['pdf.fonttype'] = 42
     rcParams['ps.fonttype'] = 42
     rcParams['font.family'] = 'Arial'
@@ -693,8 +453,8 @@ def plot_lineplot_logscale(df, save_path=None, show=False):
         "Stated Policies Scenario": "STEPS"
     }
 
-    impact_categories = ["Climate change (HH)", "Climate change (EQ)"]
-    ylabels = {"Climate change (HH)": "DALY", "Climate change (EQ)": "PDF·m²·yr"}
+    impact_categories = ["Human Health damage", "Ecosystem Quality damage"]
+    ylabels = {"Human Health damage": "DALY", "Ecosystem Quality damage": "PDF·m²·yr"}
     fill_colors = {
         "Total energy system": "#99d8c9",
         "Energy transition": "#ffadad"
@@ -779,74 +539,6 @@ def plot_lineplot_logscale(df, save_path=None, show=False):
         plt.close()
 
 
-def plot_percentage_transition(df, save_path=None, show=True):
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    import pandas as pd
-    import numpy as np
-    import os
-    from scipy.interpolate import make_interp_spline
-
-    from matplotlib import rcParams
-    rcParams['pdf.fonttype'] = 42
-    rcParams['ps.fonttype'] = 42
-    rcParams['font.family'] = 'Arial'
-    rcParams['font.size'] = 10
-
-    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
-    pivot_df = df.pivot(index=["Year", "Impact category", "Scenario"], columns="Sector", values="Impact value").reset_index()
-    pivot_df['Percentage'] = 100 * pivot_df['Energy transition'] / pivot_df['Total energy system']
-
-    impact_categories = pivot_df["Impact category"].unique()
-    scenarios = pivot_df["Scenario"].unique()
-
-    sns.set_style("white")
-    fig, axes = plt.subplots(1, len(impact_categories), figsize=(12, 5))
-
-    for idx, impact_category in enumerate(impact_categories):
-        ax = axes[idx]
-        for scenario, color in zip(scenarios, ["#1f77b4", "#2ca02c"]):
-            sub = pivot_df[(pivot_df["Impact category"] == impact_category) & (pivot_df["Scenario"] == scenario)]
-            sub = sub[np.isfinite(sub["Percentage"])]
-            years = sub["Year"].values
-            percentages = sub["Percentage"].values
-
-            if len(years) >= 4:
-                spline = make_interp_spline(years, percentages, k=3)
-                interpolated_years = np.linspace(years.min(), years.max(), 200)
-                interpolated_percentages = spline(interpolated_years)
-                ax.plot(interpolated_years, interpolated_percentages, color=color, label=scenario)
-            else:
-                interpolated_years = np.linspace(years.min(), years.max(), 200)
-                interpolated_percentages = np.interp(interpolated_years, years, percentages)
-                ax.plot(interpolated_years, interpolated_percentages, color=color, label=scenario)
-
-            ax.scatter(years, percentages, color=color, edgecolor='black')
-
-        ax.set_title(f"{impact_category}")
-        ax.set_ylabel("Percentage (%)")
-        ax.set_xlabel("")
-        ax.spines[['top', 'right']].set_visible(False)
-
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels,
-               loc='center left',
-               bbox_to_anchor=(0.85, 0.5),
-               frameon=False)
-
-    plt.tight_layout(rect=[0, 0, 0.85, 1])
-
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(f"{save_path}.pdf", format="pdf", dpi=600, transparent=True, bbox_inches='tight')
-        plt.savefig(f"{save_path}.png", format="png", dpi=600, bbox_inches='tight')
-
-    if show:
-        plt.show()
-    else:
-        plt.close()
-
-
 def plot_all_metals_subplots(
         df,
         ncols=4,
@@ -858,6 +550,18 @@ def plot_all_metals_subplots(
     """
     Multi-panel line plot with shared legend placed in the empty bottom-right subplot.
     """
+
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+    rcParams['text.usetex'] = False
+
     metals = df['Metal'].unique()
     n = len(metals)
     nrows = math.ceil(n / ncols)
@@ -923,6 +627,18 @@ def plot_all_metals_subplots_damage(df_nze, df_ssp2, impact_type, save_path=None
     Fixes: enlarged legend and avoids drawing an empty grid cell.
     """
     # Aggregate NZE over all technologies
+
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+    rcParams['text.usetex'] = False
+
     df_nze_agg = df_nze.groupby(["Year", "Metal"])[impact_type].sum().reset_index()
     df_ssp2_agg = df_ssp2.groupby(["Year", "Metal"])[impact_type].sum().reset_index()
 
@@ -983,81 +699,6 @@ def plot_all_metals_subplots_damage(df_nze, df_ssp2, impact_type, save_path=None
     plt.show()
 
 
-def plot_stacked_overlay(df_nze, df_ssp2, group_by, value_col, title, y_label,
-                                                        color_palette="tab20", custom_colors=None,
-                                                        nze_color="#000000", threshold=0.01,
-                                                        save_path=None):
-
-
-    # Combine and filter significant metals
-    df_nze = df_nze.copy()
-    df_ssp2 = df_ssp2.copy()
-    df_nze["Scenario"] = "Energy transition"
-    df_ssp2["Scenario"] = "Rest of economy"
-    df_all = pd.concat([df_nze, df_ssp2])
-
-    total_contributions = df_all.groupby(group_by)[value_col].sum()
-    significant = total_contributions[total_contributions / total_contributions.sum() >= threshold].index
-    df_all[group_by] = df_all[group_by].apply(lambda x: x if x in significant else "Other")
-
-    df_nze = df_all[df_all["Scenario"] == "Energy transition"]
-    df_ssp2 = df_all[df_all["Scenario"] == "Rest of economy"]
-
-    # Pivot SSP2
-    df_ssp2_pivot = df_ssp2.groupby(["Year", group_by])[value_col].sum().reset_index() \
-        .pivot(index="Year", columns=group_by, values=value_col).fillna(0)
-    ssp2_sorted_cols = df_ssp2_pivot.sum().sort_values(ascending=False).index
-    df_ssp2_pivot = df_ssp2_pivot[ssp2_sorted_cols]
-
-    # Aggregate NZE total
-    df_nze_total = df_nze.groupby("Year")[value_col].sum().reset_index()
-
-    # Assign colors
-    metals = df_ssp2_pivot.columns
-    if custom_colors:
-        color_dict = {m: custom_colors.get(m, "gray") for m in metals}
-    else:
-        cmap = cm.get_cmap(color_palette, len(metals))
-        color_dict = {m: cmap(i) for i, m in enumerate(metals)}
-
-    # Base arrays
-    x_years = df_nze_total["Year"].to_numpy(dtype=np.float64)
-    ssp2_bottom = np.zeros(len(df_ssp2_pivot))
-    y1_bottom = np.zeros_like(x_years)
-
-    # Stack SSP2 and capture cumulative base
-    fig, ax = plt.subplots(figsize=(10, 5))
-    for metal in ssp2_sorted_cols:
-        y = df_ssp2_pivot[metal].to_numpy(dtype=np.float64)
-        ax.fill_between(df_ssp2_pivot.index, ssp2_bottom, ssp2_bottom + y,
-                        color=color_dict[metal], alpha=0.8, label=metal)
-        ssp2_bottom += y
-    y1_bottom = ssp2_bottom
-
-    # Overlay NZE as a single layer
-    y2_top = y1_bottom + df_nze_total[value_col].to_numpy(dtype=np.float64)
-    ax.fill_between(x_years, y1_bottom, y2_top, color=nze_color, alpha=0.8, label="Energy transition")
-    ax.plot(x_years, y1_bottom, color='black', linewidth=1.0)
-
-    # Formatting
-    ax.set_title(title)
-    ax.set_ylabel(y_label)
-    ax.set_xlabel("")
-    #ax.grid(axis='y', linestyle='--', linewidth=0.5, alpha=0.4)
-
-    # Legend
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), edgecolor='black',
-              title="", fontsize=8)
-    plt.tight_layout()
-
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        fig.savefig(f"{save_path}.pdf", format="pdf", dpi=600)
-        fig.savefig(f"{save_path}.png", format="png", dpi=600)
-
-    plt.show()
-
 def plot_stacked_overlay_subplot(df_nze, df_ssp2,
                               group_by="Metal",
                               value_cols=["Total ecosystem quality", "Total human health"],
@@ -1069,6 +710,16 @@ def plot_stacked_overlay_subplot(df_nze, df_ssp2,
                               threshold=0.01,
                               save_path=None):
 
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+    rcParams['text.usetex'] = False
 
     fig, axes = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
     plt.subplots_adjust(hspace=0.3)
@@ -1087,7 +738,7 @@ def plot_stacked_overlay_subplot(df_nze, df_ssp2,
 
         total_contributions = df_all.groupby(group_by)[value_col].sum()
         significant = total_contributions[total_contributions / total_contributions.sum() >= threshold].index
-        df_all[group_by] = df_all[group_by].apply(lambda x: x if x in significant else "Other")
+        df_all[group_by] = df_all[group_by].apply(lambda x: x if x in significant else "Others")
 
         df_nze_ = df_all[df_all["Scenario"] == "Energy transition"]
         df_ssp2_ = df_all[df_all["Scenario"] == "Rest of economy"]

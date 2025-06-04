@@ -80,6 +80,28 @@ agg_mapping_hh = {'Climate change, human health, long term': 'Climate change',
  'Water availability, human health': 'Water availability'}
 
 
+# Define custom colors for aggregated midpoints categories
+mp_color_dict = {
+        "Climate change": "#1f77b4",
+        "Fisheries impact": "#aec7e8",
+        "Freshwater acidification": "#ff7f0e",
+        "Freshwater ecotoxicity": "#ffbb78",
+        "Ionizing radiations": "#2ca02c",
+        "LULUC": "#98df8a",
+        "Marine acidification": "#d62728",
+        "Other ecotoxicities": "#ff9896",
+        "Eutrophication": "#9467bd",
+        "Smog": "#c5b0d5",
+        "Water": "#8c564b",
+        "Human toxicity, cancer": "#e377c2",
+        "Human toxicity, non-cancer": "#f7b6d2",
+        "Ozone layer depletion": "#7f7f7f",
+        "Particulate matter": "#c7c7c7",
+        "Water availability": "#bcbd22",
+        "Others": "#999999"
+    }
+
+
 # Define custom colors for metals
 custom_metal_colors = {
     "Copper": "#a50026",
@@ -90,7 +112,7 @@ custom_metal_colors = {
     "Iridium": "#4575b4",
     "PGMs": "#313695",
     "Vanadium": "#4575b4",
-    "Other": "#A9A9A9", # Generic color for agg categories
+    "Others": "#A9A9A9", # Generic color for agg categories
 }
 
 custom_metal_roe_colors = {
@@ -107,6 +129,17 @@ custom_metal_roe_colors = {
     "Other": "#A9A9A9"
 }
 
+custom_metal_demand = {
+    "Copper": "#a50026",
+    "Aluminium": "#d73027",
+    "Nickel": "#f46d43",
+    "Silicon": "#fee090",
+    "Graphite": "#e0f3f8",
+    "Zinc": "#fee090",
+    "Manganese": "#4575b4",
+    "Lithium": "#313695",
+    "Others": "#A9A9A9", # Generic color for agg categories
+}
 
 # Define custom colors for technologies
 custom_tech_colors = {
