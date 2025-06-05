@@ -1,0 +1,45 @@
+Scenario,Year,Sector,CF unit,Impact value,Impact category
+Net Zero Emissions by 2050 Scenario,2023,Energy transition,PDF.m2.yr,1.29E+11,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2023,Energy transition,DALY,1339852.316,Human Health damage
+Net Zero Emissions by 2050 Scenario,2023,Total energy system,PDF.m2.yr,2.44E+13,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2023,Total energy system,DALY,250383744.7,Human Health damage
+Net Zero Emissions by 2050 Scenario,2030,Energy transition,PDF.m2.yr,1.80E+11,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2030,Energy transition,DALY,1880491.46,Human Health damage
+Net Zero Emissions by 2050 Scenario,2030,Total energy system,PDF.m2.yr,1.62E+13,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2030,Total energy system,DALY,166128467.6,Human Health damage
+Net Zero Emissions by 2050 Scenario,2035,Energy transition,PDF.m2.yr,1.90E+11,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2035,Energy transition,DALY,1979768.498,Human Health damage
+Net Zero Emissions by 2050 Scenario,2035,Total energy system,PDF.m2.yr,8.53E+12,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2035,Total energy system,DALY,87395886.06,Human Health damage
+Net Zero Emissions by 2050 Scenario,2040,Energy transition,PDF.m2.yr,1.86E+11,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2040,Energy transition,DALY,1945505.472,Human Health damage
+Net Zero Emissions by 2050 Scenario,2040,Total energy system,PDF.m2.yr,3.99E+12,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2040,Total energy system,DALY,40867429.28,Human Health damage
+Net Zero Emissions by 2050 Scenario,2045,Energy transition,PDF.m2.yr,1.59E+11,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2045,Energy transition,DALY,1660186.449,Human Health damage
+Net Zero Emissions by 2050 Scenario,2050,Energy transition,PDF.m2.yr,1.30E+11,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2050,Energy transition,DALY,1357411.361,Human Health damage
+Net Zero Emissions by 2050 Scenario,2050,Total energy system,PDF.m2.yr,5.46E+11,Ecosystem Quality damage
+Net Zero Emissions by 2050 Scenario,2050,Total energy system,DALY,5595460.196,Human Health damage
+Stated Policies Scenario,2023,Energy transition,PDF.m2.yr,1.29E+11,Ecosystem Quality damage
+Stated Policies Scenario,2023,Energy transition,DALY,1336926.124,Human Health damage
+Stated Policies Scenario,2023,Total energy system,PDF.m2.yr,2.44E+13,Ecosystem Quality damage
+Stated Policies Scenario,2023,Total energy system,DALY,250383744.7,Human Health damage
+Stated Policies Scenario,2030,Energy transition,PDF.m2.yr,1.59E+11,Ecosystem Quality damage
+Stated Policies Scenario,2030,Energy transition,DALY,1655179.042,Human Health damage
+Stated Policies Scenario,2030,Total energy system,PDF.m2.yr,2.33E+13,Ecosystem Quality damage
+Stated Policies Scenario,2030,Total energy system,DALY,239177422.1,Human Health damage
+Stated Policies Scenario,2035,Energy transition,PDF.m2.yr,1.54E+11,Ecosystem Quality damage
+Stated Policies Scenario,2035,Energy transition,DALY,1607929.748,Human Health damage
+Stated Policies Scenario,2035,Total energy system,PDF.m2.yr,2.13E+13,Ecosystem Quality damage
+Stated Policies Scenario,2035,Total energy system,DALY,218018760.5,Human Health damage
+Stated Policies Scenario,2040,Energy transition,PDF.m2.yr,1.41E+11,Ecosystem Quality damage
+Stated Policies Scenario,2040,Energy transition,DALY,1463985.088,Human Health damage
+Stated Policies Scenario,2040,Total energy system,PDF.m2.yr,1.98E+13,Ecosystem Quality damage
+Stated Policies Scenario,2040,Total energy system,DALY,202699691.2,Human Health damage
+Stated Policies Scenario,2045,Energy transition,PDF.m2.yr,1.22E+11,Ecosystem Quality damage
+Stated Policies Scenario,2045,Energy transition,DALY,1277664.974,Human Health damage
+Stated Policies Scenario,2050,Energy transition,PDF.m2.yr,1.04E+11,Ecosystem Quality damage
+Stated Policies Scenario,2050,Energy transition,DALY,1088563.574,Human Health damage
+Stated Policies Scenario,2050,Total energy system,PDF.m2.yr,1.80E+13,Ecosystem Quality damage
+Stated Policies Scenario,2050,Total energy system,DALY,184369708.1,Human Health damage

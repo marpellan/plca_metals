@@ -27,7 +27,190 @@ sns.reset_orig()
 
 
 ### FUNCTIONS
-def plot_combined_stacked_area(df, value_cols, group_by_options, titles, y_labels, custom_colors_dict, save_path):
+def plot_metal_demand_scenarios(df_nze, df_sps, save_path, custom_colors_dict=None):
+    """
+    Plot 2x2 stacked area charts of metal demand by Technology and Metal
+    for NZE and SPS scenarios, with threshold-based grouping for Metal.
+
+    Layout:
+    Top row = SPS, Bottom row = NZE
+    Left column = Technology, Right column = Metal
+    """
+    # --- Matplotlib style ---
+    rcParams['pdf.fonttype'] = 42
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+    rcParams['text.usetex'] = False
+    sns.reset_orig()
+
+    # --- Prepare data ---
+    df_nze = df_nze.copy()
+    df_sps = df_sps.copy()
+    df_nze['Scenario'] = 'NZE'
+    df_sps['Scenario'] = 'SPS'
+    df_all = pd.concat([df_nze, df_sps], ignore_index=True)
+
+    year_cols = [col for col in df_all.columns if col.isdigit()]
+    df_long = df_all.melt(id_vars=['Metal', 'Technology', 'Scenario'],
+                          value_vars=year_cols, var_name='Year', value_name='Demand')
+    df_long['Year'] = df_long['Year'].astype(int)
+
+    fig, axs = plt.subplots(2, 2, figsize=(10, 6), sharex=True)
+    plt.subplots_adjust(hspace=0.3, wspace=0.2)
+
+    handles_dict = {'Technology': [], 'Metal': []}
+    labels_dict = {'Technology': [], 'Metal': []}
+
+    # Rows: SPS (0), NZE (1); Cols: Technology (0), Metal (1)
+    for row_i, scenario in enumerate(['SPS', 'NZE']):
+        df_scenario = df_long[df_long['Scenario'] == scenario]
+        for col_j, group_by in enumerate(['Technology', 'Metal']):
+            ax = axs[row_i, col_j]
+            df_grouped = df_scenario.groupby(['Year', group_by])['Demand'].sum().reset_index()
+
+            # Threshold logic for metals
+            if group_by == 'Metal':
+                total_contrib = df_grouped.groupby(group_by)['Demand'].sum()
+                threshold = 0.01
+                significant = total_contrib[total_contrib / total_contrib.sum() >= threshold].index
+                df_grouped[group_by] = df_grouped[group_by].apply(lambda x: x if x in significant else 'Others')
+
+            df_pivot = df_grouped.pivot_table(index='Year', columns=group_by, values='Demand', aggfunc='sum').fillna(0)
+            sorted_cols = df_pivot.loc[df_pivot.index.min()].sort_values(ascending=False).index
+            df_pivot = df_pivot[sorted_cols]
+
+            categories = df_pivot.columns.tolist()
+            if custom_colors_dict and group_by in custom_colors_dict:
+                color_dict = {cat: custom_colors_dict[group_by].get(cat, 'gray') for cat in categories}
+                colors = [color_dict[cat] for cat in categories]
+            else:
+                cmap = cm.get_cmap('tab20', len(categories))
+                colors = [cmap(k) for k in range(len(categories))]
+
+            ax.stackplot(df_pivot.index, df_pivot.T, labels=categories, colors=colors, alpha=0.8)
+            ax.set_title(f"{scenario} - {group_by}", fontsize=10)
+            if row_i == 1:
+                ax.set_xlabel("")
+            if col_j == 0:
+                ax.set_ylabel("kg")
+
+            handles, labels = ax.get_legend_handles_labels()
+            handles_dict[group_by] = handles
+            labels_dict[group_by] = labels
+
+    # Shared legends
+    fig.legend(handles_dict['Technology'], labels_dict['Technology'],
+               loc="lower left", bbox_to_anchor=(0.15, -0.28), fontsize=9)
+    fig.legend(handles_dict['Metal'], labels_dict['Metal'],
+               loc="lower right", bbox_to_anchor=(0.85, -0.28), fontsize=9)
+
+    fig.savefig(f"{save_path}.pdf", dpi=600, bbox_inches="tight")
+    fig.savefig(f"{save_path}.png", dpi=600, bbox_inches="tight")
+    plt.close()
+
+
+def plot_demand_vs_specific_impacts(lca_df, demand_df, save_path=None, show=False, ncols=4):
+    """
+    Generate a multi-panel plot of indexed LCA impacts and metal demand (base 2023 = 100).
+    """
+    # ---- Preprocess LCA ----
+    lca_grouped = lca_df.groupby(["Year", "Metal"])[
+        ["Total human health", "Total ecosystem quality"]].sum().reset_index()
+    lca_melted = lca_grouped.melt(id_vars=["Year", "Metal"],
+                                  value_vars=["Total human health", "Total ecosystem quality"],
+                                  var_name="Variable", value_name="Value")
+
+    # ---- Preprocess Demand ----
+    demand_melted = demand_df.melt(id_vars=["Year", "Metal"],
+                                   value_vars=["Energy transition (kt)", "Rest of the economy (kt)"],
+                                   var_name="Variable", value_name="Value")
+
+    # ---- Merge and Normalize ----
+    combined_df = pd.concat([lca_melted, demand_melted], ignore_index=True)
+    base_2023 = combined_df[combined_df["Year"] == 2023].set_index(["Metal", "Variable"])["Value"]
+    combined_df["Base_2023"] = combined_df.set_index(["Metal", "Variable"]).index.map(base_2023)
+    combined_df["Value_base100"] = combined_df["Value"] / combined_df["Base_2023"] * 100
+
+    # ---- Plot settings ----
+    rcParams['pdf.fonttype'] = 42  # to Ensure TrueType fonts are embedded
+    rcParams['ps.fonttype'] = 42
+    rcParams['font.family'] = 'arial'
+    rcParams['font.size'] = 10
+    rcParams['axes.labelsize'] = 10
+    rcParams['legend.fontsize'] = 9
+    rcParams['xtick.labelsize'] = 9
+    rcParams['ytick.labelsize'] = 9
+    rcParams['axes.titlesize'] = 12
+    sns.reset_orig()
+
+    colors = {
+        "Total human health": "#a6dba0",  # Blue
+        "Total ecosystem quality": "#008837",  # Orange
+        "Energy transition (kt)": "#c2a5cf",  # Green
+        "Rest of the economy (kt)": "#7b3294"  # Red
+    }
+
+    metals = combined_df['Metal'].unique()
+    n = len(metals)
+    nrows = math.ceil(n / ncols)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(ncols * 4, nrows * 3), squeeze=False)
+
+    # ---- Plot each metal ----
+    for idx, metal in enumerate(metals):
+        r, c = divmod(idx, ncols)
+        ax = axes[r][c]
+        sub = combined_df[combined_df['Metal'] == metal]
+        for var, color in colors.items():
+            sub_var = sub[sub["Variable"] == var]
+            linestyle = '--' if "kt" in var else '-'  # Dashed for demand, solid for LCA
+            ax.plot(sub_var['Year'], sub_var['Value_base100'], marker='o', linestyle=linestyle, label=var, color=color)
+        ax.set_title(metal)
+        ax.set_xlabel('')
+        ax.set_ylabel('Index (2023 = 100)')
+
+    # ---- Shared legend in empty panel ----
+    handles = [Line2D([0], [0], color=color, marker='o', label=label) for label, color in colors.items()]
+    # Hide unused axes and place legend if any empty subplot
+    # ---- Shared legend in empty panel if one exists ----
+    handles = [Line2D([0], [0], color=color, marker='o', label=label) for label, color in colors.items()]
+
+    # Indices of unused subplots (e.g., when n < nrows * ncols)
+    for idx in range(n, nrows * ncols):
+        r, c = divmod(idx, ncols)
+        axes[r][c].axis('off')
+        if idx == n:  # Only in the first unused subplot
+            legend = axes[r][c].legend(
+                handles=handles,
+                loc='lower right',
+                frameon=True,
+                edgecolor='black',
+                facecolor='white',
+                fontsize=12,
+                markerscale=1.5,
+                handlelength=2.0,
+                borderpad=1.0
+            )
+            legend.get_frame().set_linewidth(1.0)
+
+    plt.tight_layout()
+
+    if save_path:
+        fig.savefig(f"{save_path}.pdf", format='pdf', dpi=600)
+        # Optionally add PNG
+        # fig.savefig(f"{save_path}.png", format='png', dpi=300)
+
+    if show:
+        plt.show()
+    plt.close()
+
+
+def plot_metal_lca_impacts(df, value_cols, group_by_options, titles, y_labels, custom_colors_dict, save_path):
     """
     Create a 2x2 grid of stacked area plots: rows = EQ/HH, cols = Technology/Metal.
     Separate legends are added below for each group_by.

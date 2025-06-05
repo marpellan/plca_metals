@@ -81,6 +81,46 @@ def calculate_lca(df, activities_dict, scenario_prefix, lcia_methods):
     return pd.DataFrame(results)
 
 
+def calculate_lca_optimized_specific(df, activities_dict, scenario_prefix, lcia_methods):
+    results = []
+    years = ["2022", "2030", "2035", "2040", "2045", "2050"]
+
+    for index, row in df.iterrows():
+        metal = row["Metal"]
+        technology = row["Technology"]
+
+        for year in years:
+            quantity = 1  # ← Always use 1 kg as functional unit
+            activity_name = (scenario_prefix, year, metal, technology)
+            activity = activities_dict.get(activity_name, None)
+
+            if activity:
+                impact_results = {}
+
+                try:
+                    lca = LCA({activity: quantity}, lcia_methods[0])
+                    lca.lci()
+
+                    for method in lcia_methods:
+                        lca.switch_method(method)
+                        lca.lcia()
+                        impact_results[method[2]] = lca.score
+
+                except:
+                    for method in lcia_methods:
+                        impact_results[method[2]] = np.nan
+
+                results.append({
+                    "Scenario": scenario_prefix,
+                    "Year": year,
+                    "Metal": metal,
+                    "Technology": technology,
+                    **impact_results
+                })
+
+    return pd.DataFrame(results)
+
+
 def calculate_lca_optimized(df, activities_dict, scenario_prefix, lcia_methods):
     """
     Optimized LCA calculations for different scenarios, years, metals, and technologies.
